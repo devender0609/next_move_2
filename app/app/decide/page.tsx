@@ -8,18 +8,18 @@ type Energy = "Low" | "Medium" | "High";
 
 type Task = {
   title: string;
-  impact: number; // 1-5
-  effort: number; // 1-5
-  resistance: number; // 1-5 (replaces dread)
-  deadline?: string; // YYYY-MM-DD
-  tagsText?: string; // UI input
-  tags?: string[]; // stored
+  impact: number;
+  effort: number;
+  resistance: number;
+  deadline?: string;
+  tagsText?: string;
+  tags?: string[];
 };
 
 type Recommendation = {
   selectedTaskTitle: string;
   rationale: string;
-  confidence: number; // 0-100
+  confidence: number;
   alternatives: string[];
 };
 
@@ -58,14 +58,15 @@ function scoreTask(t: Task, energy: Energy, timeMinutes: number) {
 }
 
 export default function DecidePage() {
+  const initialTasks: Task[] = [
+    { title: "", impact: 3, effort: 3, resistance: 3, tagsText: "" },
+    { title: "", impact: 3, effort: 3, resistance: 3, tagsText: "" },
+  ];
+
   const [goal, setGoal] = useState("");
   const [timeMinutes, setTimeMinutes] = useState<number>(30);
   const [energy, setEnergy] = useState<Energy>("Medium");
-
-  const [tasks, setTasks] = useState<Task[]>([
-    { title: "", impact: 3, effort: 3, resistance: 3, tagsText: "" },
-    { title: "", impact: 3, effort: 3, resistance: 3, tagsText: "" },
-  ]);
+  const [tasks, setTasks] = useState<Task[]>(initialTasks);
 
   const [rec, setRec] = useState<Recommendation | null>(null);
   const [status, setStatus] = useState<string | null>(null);
@@ -138,29 +139,16 @@ export default function DecidePage() {
         { title: "Make a 3-item home to-do list", impact: 3, effort: 1, resistance: 1, tagsText: "home, planning" },
       ],
     },
-    {
-      name: "Career Growth",
-      goal: "Do one thing that compounds professionally",
-      timeMinutes: 40,
-      energy: "Medium" as Energy,
-      tasks: [
-        { title: "Write 5 bullet achievements for CV", impact: 5, effort: 3, resistance: 3, tagsText: "career" },
-        { title: "Reach out to 1 collaborator", impact: 4, effort: 2, resistance: 3, tagsText: "career, network" },
-        { title: "Outline a small portfolio post", impact: 4, effort: 3, resistance: 3, tagsText: "career" },
-      ],
-    },
-    {
-      name: "Relationships",
-      goal: "Strengthen a relationship today",
-      timeMinutes: 15,
-      energy: "Low" as Energy,
-      tasks: [
-        { title: "Send a thoughtful message to someone", impact: 4, effort: 1, resistance: 2, tagsText: "relationships" },
-        { title: "Schedule a 10-minute call", impact: 4, effort: 2, resistance: 3, tagsText: "relationships" },
-        { title: "Write 3 gratitude notes (not sent yet)", impact: 3, effort: 1, resistance: 1, tagsText: "relationships" },
-      ],
-    },
   ];
+
+  function resetAll() {
+    setGoal("");
+    setTimeMinutes(30);
+    setEnergy("Medium");
+    setTasks(initialTasks);
+    setRec(null);
+    setStatus(null);
+  }
 
   function applyTemplate(i: number) {
     const t = templates[i];
@@ -224,7 +212,6 @@ export default function DecidePage() {
       `Fits your energy (${energy}) and time (${timeMinutes} min).`,
       `Lower effort/resistance relative to alternatives.`,
     ];
-
     if (best.t.deadline) rationaleParts.push(`Deadline: ${best.t.deadline}.`);
 
     setRec({
@@ -238,7 +225,6 @@ export default function DecidePage() {
   async function saveDecision() {
     setStatus(null);
     setBusy(true);
-
     try {
       const supabase = supabaseBrowser();
       const { data: auth } = await supabase.auth.getUser();
@@ -271,7 +257,6 @@ export default function DecidePage() {
   async function addToDailyFocus() {
     setStatus(null);
     setBusy(true);
-
     try {
       const supabase = supabaseBrowser();
       const { data: auth } = await supabase.auth.getUser();
@@ -301,17 +286,18 @@ export default function DecidePage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <div className="text-sm text-slate-500 dark:text-slate-400">New decision</div>
-          <h2 className="text-2xl font-semibold">What should you do next?</h2>
+          <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">
+            What should you do next?
+          </h2>
         </div>
 
         <div className="flex gap-2">
           <Link
             href="/app/history"
-            className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:hover:bg-slate-800"
+            className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:hover:bg-slate-800 dark:text-slate-100"
           >
             History
           </Link>
@@ -326,13 +312,13 @@ export default function DecidePage() {
 
       {/* Templates */}
       <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <div className="font-semibold">Templates</div>
+        <div className="font-semibold text-slate-900 dark:text-slate-100">Templates</div>
         <div className="mt-3 flex flex-wrap gap-2">
           {templates.map((t, i) => (
             <button
               key={t.name}
               onClick={() => applyTemplate(i)}
-              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:hover:bg-slate-800"
+              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:hover:bg-slate-800 dark:text-slate-100"
             >
               {t.name}
             </button>
@@ -349,7 +335,7 @@ export default function DecidePage() {
               value={goal}
               onChange={(e) => setGoal(e.target.value)}
               placeholder="e.g., Make progress on my project"
-              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-300 dark:border-slate-700 dark:bg-slate-950"
+              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-slate-300 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500"
             />
           </label>
 
@@ -361,7 +347,7 @@ export default function DecidePage() {
               max={240}
               value={timeMinutes}
               onChange={(e) => setTimeMinutes(parseInt(e.target.value || "30", 10))}
-              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-300 dark:border-slate-700 dark:bg-slate-950"
+              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-slate-300 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
             />
           </label>
 
@@ -370,7 +356,7 @@ export default function DecidePage() {
             <select
               value={energy}
               onChange={(e) => setEnergy(e.target.value as Energy)}
-              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-300 dark:border-slate-700 dark:bg-slate-950"
+              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-slate-300 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
             >
               <option>Low</option>
               <option>Medium</option>
@@ -383,7 +369,7 @@ export default function DecidePage() {
       {/* Tasks */}
       <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="flex items-center justify-between">
-          <div className="font-semibold">Tasks</div>
+          <div className="font-semibold text-slate-900 dark:text-slate-100">Tasks</div>
           <button onClick={addTask} className="rounded-xl px-3 py-2 text-sm text-white gradient-brand hover:opacity-95">
             + Add task
           </button>
@@ -403,46 +389,30 @@ export default function DecidePage() {
                       value={t.title}
                       onChange={(e) => updateTask(idx, { title: e.target.value })}
                       placeholder="e.g., Draft 3 slides"
-                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-300 dark:border-slate-700 dark:bg-slate-900"
+                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
                     />
                   </label>
 
                   <div className="grid gap-3 md:grid-cols-4">
-                    <label className="space-y-1">
-                      <div className="text-xs text-slate-500 dark:text-slate-400">Impact (1-5)</div>
-                      <input
-                        type="number"
-                        min={1}
-                        max={5}
-                        value={t.impact}
-                        onChange={(e) => updateTask(idx, { impact: parseInt(e.target.value || "3", 10) })}
-                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-300 dark:border-slate-700 dark:bg-slate-900"
-                      />
-                    </label>
-
-                    <label className="space-y-1">
-                      <div className="text-xs text-slate-500 dark:text-slate-400">Effort (1-5)</div>
-                      <input
-                        type="number"
-                        min={1}
-                        max={5}
-                        value={t.effort}
-                        onChange={(e) => updateTask(idx, { effort: parseInt(e.target.value || "3", 10) })}
-                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-300 dark:border-slate-700 dark:bg-slate-900"
-                      />
-                    </label>
-
-                    <label className="space-y-1">
-                      <div className="text-xs text-slate-500 dark:text-slate-400">Resistance (1-5)</div>
-                      <input
-                        type="number"
-                        min={1}
-                        max={5}
-                        value={t.resistance}
-                        onChange={(e) => updateTask(idx, { resistance: parseInt(e.target.value || "3", 10) })}
-                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-300 dark:border-slate-700 dark:bg-slate-900"
-                      />
-                    </label>
+                    {[
+                      ["Impact (1-5)", "impact"] as const,
+                      ["Effort (1-5)", "effort"] as const,
+                      ["Resistance (1-5)", "resistance"] as const,
+                    ].map(([label, key]) => (
+                      <label key={key} className="space-y-1">
+                        <div className="text-xs text-slate-500 dark:text-slate-400">{label}</div>
+                        <input
+                          type="number"
+                          min={1}
+                          max={5}
+                          value={(t as any)[key]}
+                          onChange={(e) =>
+                            updateTask(idx, { [key]: parseInt(e.target.value || "3", 10) } as any)
+                          }
+                          className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                        />
+                      </label>
+                    ))}
 
                     <label className="space-y-1">
                       <div className="text-xs text-slate-500 dark:text-slate-400">Deadline</div>
@@ -455,7 +425,7 @@ export default function DecidePage() {
                           if (v && v < todayISO()) return;
                           updateTask(idx, { deadline: v });
                         }}
-                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-300 dark:border-slate-700 dark:bg-slate-900"
+                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
                       />
                     </label>
 
@@ -467,7 +437,7 @@ export default function DecidePage() {
                         value={t.tagsText ?? ""}
                         onChange={(e) => updateTask(idx, { tagsText: e.target.value })}
                         placeholder="work, admin"
-                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-300 dark:border-slate-700 dark:bg-slate-900"
+                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
                       />
                     </label>
                   </div>
@@ -475,8 +445,7 @@ export default function DecidePage() {
 
                 <button
                   onClick={() => removeTask(idx)}
-                  className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800"
-                  title="Remove task"
+                  className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800 dark:text-slate-100"
                 >
                   Remove
                 </button>
@@ -498,7 +467,7 @@ export default function DecidePage() {
         <button
           onClick={saveDecision}
           disabled={busy}
-          className="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm hover:bg-slate-50 disabled:opacity-60 dark:border-slate-800 dark:bg-slate-900 dark:hover:bg-slate-800"
+          className="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm hover:bg-slate-50 disabled:opacity-60 dark:border-slate-800 dark:bg-slate-900 dark:hover:bg-slate-800 dark:text-slate-100"
         >
           Save to history
         </button>
@@ -506,13 +475,20 @@ export default function DecidePage() {
         <button
           onClick={addToDailyFocus}
           disabled={busy}
-          className="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm hover:bg-slate-50 disabled:opacity-60 dark:border-slate-800 dark:bg-slate-900 dark:hover:bg-slate-800"
+          className="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm hover:bg-slate-50 disabled:opacity-60 dark:border-slate-800 dark:bg-slate-900 dark:hover:bg-slate-800 dark:text-slate-100"
         >
           Add to Daily Focus
         </button>
+
+        {/* ✅ Reset button */}
+        <button
+          onClick={resetAll}
+          className="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:hover:bg-slate-800 dark:text-slate-100"
+        >
+          Reset
+        </button>
       </div>
 
-      {/* Recommendation */}
       {rec && (
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <div className="text-sm text-slate-500 dark:text-slate-400">
@@ -522,12 +498,14 @@ export default function DecidePage() {
             </div>
           </div>
 
-          <div className="mt-1 text-2xl font-semibold">{rec.selectedTaskTitle}</div>
+          <div className="mt-1 text-2xl font-semibold text-slate-900 dark:text-slate-100">
+            {rec.selectedTaskTitle}
+          </div>
           <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{rec.rationale}</p>
 
           {rec.alternatives?.length > 0 && (
             <div className="mt-4">
-              <div className="text-sm font-semibold">Alternatives</div>
+              <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">Alternatives</div>
               <ul className="mt-2 list-disc pl-5 text-sm text-slate-600 dark:text-slate-300">
                 {rec.alternatives.map((a) => (
                   <li key={a}>{a}</li>
@@ -539,7 +517,7 @@ export default function DecidePage() {
       )}
 
       {status && (
-        <div className="rounded-xl border border-slate-200 bg-white p-3 text-sm dark:border-slate-800 dark:bg-slate-900">
+        <div className="rounded-xl border border-slate-200 bg-white p-3 text-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100">
           {status}
         </div>
       )}
