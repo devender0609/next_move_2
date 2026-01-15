@@ -5,8 +5,6 @@
 :root {
   --bg: 248 250 252;      /* slate-50 */
   --fg: 15 23 42;         /* slate-900 */
-  --card: 255 255 255;
-  --card2: 248 250 252;   /* subtle panel */
   --muted: 100 116 139;   /* slate-500 */
   --border: 226 232 240;  /* slate-200 */
   --brand1: 37 99 235;    /* blue-600 */
@@ -22,22 +20,38 @@ html, body {
   background: linear-gradient(135deg, rgb(var(--brand1)), rgb(var(--brand2)));
 }
 
-/* DARK MODE: higher contrast, less “washed out” */
+/* ---- Dark mode: improve readability ---- */
 .dark {
-  --bg: 3 7 18;           /* slightly softer than slate-950 */
-  --fg: 241 245 249;      /* slate-100 */
-  --card: 17 24 39;       /* slate-900 */
-  --card2: 15 23 42;      /* slate-900-ish */
-  --muted: 148 163 184;   /* slate-400 */
-  --border: 51 65 85;     /* slate-700 */
+  --bg: 3 7 18;          /* softer than pure black */
+  --fg: 241 245 249;     /* slate-100 */
+  --muted: 203 213 225;  /* slate-300 (brighter) */
+  --border: 51 65 85;    /* slate-700 */
 }
 
+/* Make sure default text is bright on dark pages */
 .dark body {
   background: rgb(var(--bg));
   color: rgb(var(--fg));
 }
 
-/* helpful defaults for dark mode text in inputs */
+/* Improve card / box readability in dark mode */
+.dark .dark\:bg-slate-900,
+.dark .dark\:bg-slate-950 {
+  color: rgb(241 245 249); /* slate-100 */
+}
+
+.dark .dark\:text-slate-300 {
+  color: rgb(226 232 240); /* slate-200 */
+}
+
+.dark .dark\:text-slate-400 {
+  color: rgb(203 213 225); /* slate-300 */
+}
+
+/* placeholder */
 ::placeholder {
-  color: rgba(148, 163, 184, 0.9);
+  color: rgba(148, 163, 184, 0.95);
+}
+.dark ::placeholder {
+  color: rgba(203, 213, 225, 0.75);
 }
