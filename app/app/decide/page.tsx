@@ -1,243 +1,297 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { supabaseBrowser } from "@/lib/supabase/client";
-import type { Recommendation, TaskInput } from "@/lib/types";
-import { Button } from "@/components/ui/Button";
-import { Card, CardContent, CardHeader } from "@/components/ui/Card";
-import { Input } from "@/components/ui/Input";
-import { Select } from "@/components/ui/Select";
-import { Badge } from "@/components/ui/Badge";
 
-type Template = {
-  name: string;
-  goal: string;
-  timeMinutes: number;
-  energy: number;
-  tasks: TaskInput[];
+type Energy = "Low" | "Medium" | "High";
+
+type Task = {
+  title: string;
+  impact: number; // 1-5
+  effort: number; // 1-5
+  resistance: number; // 1-5 (replaces dread)
+  deadline?: string; // YYYY-MM-DD
+  tagsText?: string; // comma separated in UI
+  tags?: string[]; // stored
 };
 
-const templates: Template[] = [
-  {
-    name: "Deep work",
-    goal: "Make meaningful progress on the highest-impact work.",
-    timeMinutes: 60,
-    energy: 4,
-    tasks: [
-      { title: "Draft key section / outline", impact: 5, effort: 4, anxiety: 3 },
-      { title: "Revise existing content", impact: 4, effort: 3, anxiety: 2 },
-      { title: "Admin messages", impact: 2, effort: 2, anxiety: 2 },
-    ],
-  },
-  {
-    name: "Admin cleanup",
-    goal: "Clear the backlog and reduce mental load.",
-    timeMinutes: 30,
-    energy: 3,
-    tasks: [
-      { title: "Reply to urgent emails", impact: 4, effort: 2, anxiety: 2 },
-      { title: "Schedule / calendar cleanup", impact: 3, effort: 2, anxiety: 2 },
-      { title: "File / document organization", impact: 2, effort: 2, anxiety: 1 },
-    ],
-  },
-  {
-    name: "Quick wins",
-    goal: "Do something useful even with low energy.",
-    timeMinutes: 20,
-    energy: 2,
-    tasks: [
-      { title: "One small task I’ve been avoiding", impact: 3, effort: 2, anxiety: 4 },
-      { title: "Tidy workspace / notes", impact: 2, effort: 1, anxiety: 1 },
-      { title: "Plan next 3 steps", impact: 4, effort: 2, anxiety: 2 },
-    ],
-  },
-];
+type Recommendation = {
+  selectedTaskTitle: string;
+  rationale: string;
+  confidence: number; // 0-100
+  alternatives: string[];
+};
 
-function ScorePill({ label, value }: { label: string; value: number }) {
-  const tone =
-    value >= 4
-      ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-      : value === 3
-      ? "bg-slate-50 text-slate-700 border-slate-200"
-      : "bg-amber-50 text-amber-800 border-amber-200";
-  return (
-    <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs ${tone}`}>
-      <span className="text-[10px] uppercase tracking-wide">{label}</span>
-      <span className="font-semibold">{value}</span>
-    </span>
-  );
+const todayISO = () => new Date().toISOString().slice(0, 10);
+
+function clamp(n: number, lo: number, hi: number) {
+  return Math.max(lo, Math.min(hi, n));
 }
 
-function TaskCard({
-  t,
-  onChange,
-  onRemove,
-}: {
-  t: TaskInput;
-  onChange: (patch: Partial<TaskInput>) => void;
-  onRemove: () => void;
-}) {
-  return (
-    <Card className="shadow-sm">
-      <CardHeader className="flex items-center justify-between gap-3">
-        <div className="min-w-0 flex-1">
-          <Input
-            placeholder="Task title (e.g., Draft methods section)"
-            value={t.title}
-            onChange={(e) => onChange({ title: e.target.value })}
-          />
-          <div className="mt-2 flex flex-wrap gap-2">
-            <ScorePill label="impact" value={t.impact} />
-            <ScorePill label="effort" value={t.effort} />
-            <ScorePill label="dread" value={t.anxiety} />
-          </div>
-        </div>
-        <Button variant="secondary" size="sm" onClick={onRemove}>
-          Remove
-        </Button>
-      </CardHeader>
-      <CardContent className="grid grid-cols-1 md:grid-cols-4 gap-3">
-        {([
-          ["impact", "Impact"],
-          ["effort", "Effort"],
-          ["anxiety", "Dread"],
-        ] as const).map(([k, label]) => (
-          <label key={k} className="space-y-1">
-            <div className="text-xs text-slate-500">{label} (1–5)</div>
-            <Select value={String(t[k])} onChange={(e) => onChange({ [k]: Number(e.target.value) } as any)}>
-              {[1, 2, 3, 4, 5].map((n) => (
-                <option key={n} value={n}>
-                  {n}
-                </option>
-              ))}
-            </Select>
-          </label>
-        ))}
+function scoreTask(t: Task, energy: Energy, timeMinutes: number) {
+  // Simple scoring model (no AI required)
+  // Goal: maximize impact, minimize effort, minimize resistance, respect energy/time, consider deadline.
+  const impact = clamp(t.impact || 3, 1, 5);
+  const effort = clamp(t.effort || 3, 1, 5);
+  const resistance = clamp(t.resistance || 3, 1, 5);
 
-        <label className="space-y-1">
-          <div className="text-xs text-slate-500">Deadline (optional)</div>
-          <Input
-            type="date"
-            value={t.deadline ?? ""}
-            onChange={(e) => onChange({ deadline: e.target.value || undefined })}
-          />
-        </label>
-      </CardContent>
-    </Card>
-  );
+  // Energy fit: if low energy, penalize high effort; if high energy, reward impact a bit more
+  const energyEffortPenalty =
+    energy === "Low" ? (effort - 1) * 1.2 : energy === "Medium" ? (effort - 1) * 0.8 : (effort - 1) * 0.5;
+
+  const resistancePenalty = (resistance - 1) * 0.9;
+
+  // Time fit: if time is short, penalize higher effort more
+  const timePenalty = timeMinutes <= 20 ? (effort - 1) * 0.8 : timeMinutes <= 45 ? (effort - 1) * 0.4 : 0;
+
+  // Deadline urgency bonus (if within 2 days)
+  let deadlineBonus = 0;
+  if (t.deadline) {
+    const d = new Date(t.deadline + "T00:00:00");
+    const now = new Date(todayISO() + "T00:00:00");
+    const diffDays = Math.round((d.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    if (diffDays <= 2 && diffDays >= 0) deadlineBonus = 1.0;
+    if (diffDays < 0) deadlineBonus = -2.0; // past date (should be blocked by UI)
+  }
+
+  // Primary score
+  const base = impact * 2.2 - energyEffortPenalty - resistancePenalty - timePenalty + deadlineBonus;
+  return base;
 }
 
 export default function DecidePage() {
-  const [goal, setGoal] = useState("Finish the most important thing.");
-  const [timeMinutes, setTimeMinutes] = useState(45);
-  const [energy, setEnergy] = useState(3);
-  const [tasks, setTasks] = useState<TaskInput[]>([
-    { title: "Email cleanup", impact: 2, effort: 2, anxiety: 2 },
-    { title: "Work on presentation", impact: 5, effort: 4, anxiety: 3 },
+  const [goal, setGoal] = useState("");
+  const [timeMinutes, setTimeMinutes] = useState<number>(30);
+  const [energy, setEnergy] = useState<Energy>("Medium");
+
+  const [tasks, setTasks] = useState<Task[]>([
+    { title: "", impact: 3, effort: 3, resistance: 3, tagsText: "" },
+    { title: "", impact: 3, effort: 3, resistance: 3, tagsText: "" },
   ]);
 
   const [rec, setRec] = useState<Recommendation | null>(null);
   const [status, setStatus] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  const canRecommend = useMemo(
-    () => tasks.length > 0 && tasks.some((t) => (t.title || "").trim().length > 0),
-    [tasks]
-  );
+  const templates = [
+    {
+      name: "Deep Work",
+      goal: "Make progress on my most important project",
+      timeMinutes: 60,
+      energy: "High" as Energy,
+      tasks: [
+        { title: "Draft the next section / outline", impact: 5, effort: 4, resistance: 3, tagsText: "work, deep" },
+        { title: "Clean up notes + create next actions", impact: 4, effort: 3, resistance: 2, tagsText: "work" },
+        { title: "Schedule 1 focused block for tomorrow", impact: 3, effort: 2, resistance: 1, tagsText: "planning" },
+      ],
+    },
+    {
+      name: "Admin Cleanup",
+      goal: "Clear small tasks so I can focus later",
+      timeMinutes: 25,
+      energy: "Low" as Energy,
+      tasks: [
+        { title: "Reply to the 3 most urgent emails", impact: 3, effort: 2, resistance: 2, tagsText: "admin" },
+        { title: "Pay / confirm one bill or appointment", impact: 4, effort: 2, resistance: 2, tagsText: "admin, life" },
+        { title: "Create a 3-item to-do list for tomorrow", impact: 3, effort: 1, resistance: 1, tagsText: "planning" },
+      ],
+    },
+    {
+      name: "Quick Wins",
+      goal: "Get momentum with small wins",
+      timeMinutes: 15,
+      energy: "Low" as Energy,
+      tasks: [
+        { title: "Do one 5-minute cleanup task", impact: 2, effort: 1, resistance: 1, tagsText: "life" },
+        { title: "Send one message you’ve been delaying", impact: 3, effort: 2, resistance: 4, tagsText: "admin" },
+        { title: "Prep materials for next task (open docs, notes)", impact: 3, effort: 1, resistance: 1, tagsText: "work" },
+      ],
+    },
+  ];
 
-  function applyTemplate(name: string) {
-    const t = templates.find((x) => x.name === name);
-    if (!t) return;
+  function applyTemplate(i: number) {
+    const t = templates[i];
     setGoal(t.goal);
     setTimeMinutes(t.timeMinutes);
     setEnergy(t.energy);
-    setTasks(t.tasks);
+    setTasks(t.tasks.map((x) => ({ ...x })));
     setRec(null);
-    setStatus(`Template applied: ${name}`);
+    setStatus(null);
+  }
+
+  function updateTask(idx: number, patch: Partial<Task>) {
+    setTasks((prev) => prev.map((t, i) => (i === idx ? { ...t, ...patch } : t)));
   }
 
   function addTask() {
-    setTasks((prev) => [...prev, { title: "", impact: 3, effort: 3, anxiety: 3 }]);
+    setTasks((prev) => [...prev, { title: "", impact: 3, effort: 3, resistance: 3, tagsText: "" }]);
   }
 
-  async function getRecommendation() {
-    setBusy(true);
-    setStatus(null);
-    setRec(null);
+  function removeTask(idx: number) {
+    setTasks((prev) => prev.filter((_, i) => i !== idx));
+  }
 
-    const cleaned = tasks
-      .map((t) => ({ ...t, title: (t.title || "").trim() }))
+  const cleanedTasks = useMemo(() => {
+    return tasks
+      .map((t) => ({
+        ...t,
+        title: (t.title || "").trim(),
+        tags: (t.tagsText || "")
+          .split(",")
+          .map((x) => x.trim())
+          .filter(Boolean),
+      }))
       .filter((t) => t.title.length > 0);
+  }, [tasks]);
 
-    if (cleaned.length === 0) {
-      setBusy(false);
-      setStatus("Add at least one task title.");
+  function computeRecommendation() {
+    setStatus(null);
+
+    if (!goal.trim()) {
+      setStatus("Please enter a goal.");
+      return;
+    }
+    if (cleanedTasks.length === 0) {
+      setStatus("Add at least one task.");
       return;
     }
 
-    const res = await fetch("/api/decide", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ goal, time_minutes: timeMinutes, energy, tasks: cleaned }),
+    const scored = cleanedTasks
+      .map((t) => ({ t, s: scoreTask(t, energy, timeMinutes) }))
+      .sort((a, b) => b.s - a.s);
+
+    const best = scored[0];
+    const alts = scored.slice(1, 4).map((x) => x.t.title);
+
+    const confidence = clamp(Math.round(55 + (best.s - scored[Math.min(1, scored.length - 1)]?.s || 0) * 8), 45, 92);
+
+    const rationaleParts = [
+      `High impact (${best.t.impact}/5).`,
+      `Fits your energy (${energy}) and time (${timeMinutes} min).`,
+      `Lower effort/resistance relative to alternatives.`,
+    ];
+
+    if (best.t.deadline) rationaleParts.push(`Deadline: ${best.t.deadline}.`);
+
+    setRec({
+      selectedTaskTitle: best.t.title,
+      confidence,
+      rationale: rationaleParts.join(" "),
+      alternatives: alts,
     });
-
-    setBusy(false);
-
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      setStatus(err?.error || "Failed to decide.");
-      return;
-    }
-
-    const data = (await res.json()) as Recommendation;
-    setRec(data);
   }
 
   async function saveDecision() {
     setStatus(null);
-    const supabase = supabaseBrowser();
-    const { data: auth } = await supabase.auth.getUser();
+    setBusy(true);
 
-    if (!auth.user) {
-      setStatus("Please login first (App → Login).");
-      return;
+    try {
+      const supabase = supabaseBrowser();
+      const { data: auth } = await supabase.auth.getUser();
+
+      if (!auth.user) {
+        setStatus("Login required to save. Go to Login and come back.");
+        setBusy(false);
+        return;
+      }
+      if (!rec) {
+        setStatus("Create a recommendation first.");
+        setBusy(false);
+        return;
+      }
+
+      const { error } = await supabase.from("decisions").insert({
+        user_id: auth.user.id,
+        goal,
+        time_minutes: timeMinutes,
+        energy,
+        tasks: cleanedTasks,
+        recommendation: rec,
+      });
+
+      if (error) {
+        setStatus(error.message);
+      } else {
+        setStatus("Saved to history!");
+      }
+    } finally {
+      setBusy(false);
     }
-    if (!rec) {
-      setStatus("Get a recommendation first.");
-      return;
+  }
+
+  // Add the recommended task to Daily Focus (requires focus_items table)
+  async function addToDailyFocus() {
+    setStatus(null);
+    setBusy(true);
+
+    try {
+      const supabase = supabaseBrowser();
+      const { data: auth } = await supabase.auth.getUser();
+
+      if (!auth.user) {
+        setStatus("Login required to use Daily Focus.");
+        return;
+      }
+      if (!rec) {
+        setStatus("Create a recommendation first.");
+        return;
+      }
+
+      const { error } = await supabase.from("focus_items").insert({
+        user_id: auth.user.id,
+        date: todayISO(),
+        title: rec.selectedTaskTitle,
+        done: false,
+      });
+
+      if (error) setStatus(error.message);
+      else setStatus("Added to Daily Focus!");
+    } finally {
+      setBusy(false);
     }
-
-    const cleaned = tasks
-      .map((t) => ({ ...t, title: (t.title || "").trim() }))
-      .filter((t) => t.title.length > 0);
-
-    const { error } = await supabase.from("decisions").insert({
-      user_id: auth.user.id,
-      goal,
-      time_minutes: timeMinutes,
-      energy,
-      tasks: cleaned,
-      recommendation: rec,
-    });
-
-    if (error) setStatus(error.message);
-    else setStatus("Saved to history!");
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      {/* Header */}
+      <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <div className="text-sm text-slate-500">New decision</div>
-          <h2 className="text-2xl font-semibold">What should I do next?</h2>
+          <div className="text-sm" style={{ color: "rgb(var(--muted))" }}>New decision</div>
+          <h2 className="text-2xl font-semibold">What should you do next?</h2>
         </div>
 
-        <div className="flex flex-wrap gap-2">
-          {templates.map((t) => (
+        <div className="flex gap-2">
+          <Link
+            href="/app/login"
+            className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:hover:bg-slate-800"
+          >
+            Login
+          </Link>
+          <Link
+            href="/app/history"
+            className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:hover:bg-slate-800"
+          >
+            History
+          </Link>
+          <Link
+            href="/app/focus"
+            className="rounded-xl px-4 py-2 text-sm text-white gradient-brand hover:opacity-95"
+          >
+            Daily Focus
+          </Link>
+        </div>
+      </div>
+
+      {/* Templates */}
+      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div className="font-semibold">Templates</div>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {templates.map((t, i) => (
             <button
               key={t.name}
-              onClick={() => applyTemplate(t.name)}
-              className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"
+              onClick={() => applyTemplate(i)}
+              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:hover:bg-slate-800"
             >
               {t.name}
             </button>
@@ -245,109 +299,210 @@ export default function DecidePage() {
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge>Goal</Badge>
-            <span className="text-xs text-slate-500">Keep it short and concrete.</span>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Input
-            value={goal}
-            onChange={(e) => setGoal(e.target.value)}
-            placeholder="Goal (e.g., Finish slides for meeting)"
-          />
-          <div className="grid md:grid-cols-3 gap-3">
-            <label className="space-y-1">
-              <div className="text-xs text-slate-500">Time available</div>
-              <Select value={String(timeMinutes)} onChange={(e) => setTimeMinutes(Number(e.target.value))}>
-                {[15, 20, 30, 45, 60, 90, 120, 180].map((m) => (
-                  <option key={m} value={m}>
-                    {m} minutes
-                  </option>
-                ))}
-              </Select>
-            </label>
-            <label className="space-y-1">
-              <div className="text-xs text-slate-500">Energy</div>
-              <Select value={String(energy)} onChange={(e) => setEnergy(Number(e.target.value))}>
-                {[1, 2, 3, 4, 5].map((n) => (
-                  <option key={n} value={n}>
-                    {n} / 5
-                  </option>
-                ))}
-              </Select>
-            </label>
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
-              <div className="font-medium text-slate-700">Tip</div>
-              If energy is low, the engine favors lower-effort tasks unless impact is much higher.
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Inputs */}
+      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div className="grid gap-4 md:grid-cols-3">
+          <label className="space-y-1 md:col-span-3">
+            <div className="text-xs" style={{ color: "rgb(var(--muted))" }}>Goal</div>
+            <input
+              value={goal}
+              onChange={(e) => setGoal(e.target.value)}
+              placeholder="e.g., Make progress on my project"
+              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-300 dark:border-slate-800 dark:bg-slate-950"
+            />
+          </label>
 
-      <div className="flex items-center justify-between">
-        <div>
-          <div className="text-sm font-semibold">Tasks</div>
-          <div className="text-xs text-slate-500">Add 2–5 tasks for best results.</div>
+          <label className="space-y-1">
+            <div className="text-xs" style={{ color: "rgb(var(--muted))" }}>Time available (minutes)</div>
+            <input
+              type="number"
+              min={5}
+              max={240}
+              value={timeMinutes}
+              onChange={(e) => setTimeMinutes(parseInt(e.target.value || "30", 10))}
+              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-300 dark:border-slate-800 dark:bg-slate-950"
+            />
+          </label>
+
+          <label className="space-y-1">
+            <div className="text-xs" style={{ color: "rgb(var(--muted))" }}>Energy</div>
+            <select
+              value={energy}
+              onChange={(e) => setEnergy(e.target.value as Energy)}
+              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-300 dark:border-slate-800 dark:bg-slate-950"
+            >
+              <option>Low</option>
+              <option>Medium</option>
+              <option>High</option>
+            </select>
+          </label>
+
+          <div className="md:col-span-1" />
         </div>
-        <Button variant="secondary" onClick={addTask}>
-          Add task
-        </Button>
       </div>
 
-      <div className="space-y-3">
-        {tasks.map((t, i) => (
-          <TaskCard
-            key={i}
-            t={t}
-            onChange={(patch) =>
-              setTasks((prev) => prev.map((x, idx) => (idx === i ? { ...x, ...patch } : x)))
-            }
-            onRemove={() => setTasks((prev) => prev.filter((_, idx) => idx !== i))}
-          />
-        ))}
-      </div>
+      {/* Tasks */}
+      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div className="flex items-center justify-between">
+          <div className="font-semibold">Tasks</div>
+          <button
+            onClick={addTask}
+            className="rounded-xl px-3 py-2 text-sm text-white gradient-brand hover:opacity-95"
+          >
+            + Add task
+          </button>
+        </div>
 
-      <div className="flex flex-wrap gap-3">
-        <Button onClick={getRecommendation} disabled={busy || !canRecommend}>
-          {busy ? "Thinking..." : "Recommend"}
-        </Button>
-        <Button variant="secondary" onClick={saveDecision} disabled={!rec}>
-          Save to history
-        </Button>
-      </div>
+        <div className="mt-4 space-y-4">
+          {tasks.map((t, idx) => (
+            <div
+              key={idx}
+              className="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="w-full space-y-3">
+                  <label className="space-y-1">
+                    <div className="text-xs" style={{ color: "rgb(var(--muted))" }}>Task title</div>
+                    <input
+                      value={t.title}
+                      onChange={(e) => updateTask(idx, { title: e.target.value })}
+                      placeholder="e.g., Draft 3 slides"
+                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-300 dark:border-slate-700 dark:bg-slate-950"
+                    />
+                  </label>
 
-      {status && <div className="rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-700">{status}</div>}
+                  <div className="grid gap-3 md:grid-cols-4">
+                    <label className="space-y-1">
+                      <div className="text-xs" style={{ color: "rgb(var(--muted))" }}>Impact (1-5)</div>
+                      <input
+                        type="number"
+                        min={1}
+                        max={5}
+                        value={t.impact}
+                        onChange={(e) => updateTask(idx, { impact: parseInt(e.target.value || "3", 10) })}
+                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-300 dark:border-slate-700 dark:bg-slate-950"
+                      />
+                    </label>
 
-      {rec && (
-        <Card className="border-slate-900/10">
-          <CardHeader className="flex items-center justify-between gap-3">
-            <div>
-              <div className="text-xs text-slate-500">Recommendation</div>
-              <div className="text-xl font-semibold">{rec.selectedTaskTitle}</div>
-            </div>
-            <Badge className="uppercase">{rec.confidence}</Badge>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <p className="text-slate-700">{rec.rationale}</p>
+                    <label className="space-y-1">
+                      <div className="text-xs" style={{ color: "rgb(var(--muted))" }}>Effort (1-5)</div>
+                      <input
+                        type="number"
+                        min={1}
+                        max={5}
+                        value={t.effort}
+                        onChange={(e) => updateTask(idx, { effort: parseInt(e.target.value || "3", 10) })}
+                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-300 dark:border-slate-700 dark:bg-slate-950"
+                      />
+                    </label>
 
-            {rec.alternatives?.length > 0 && (
-              <div>
-                <div className="text-sm font-semibold">Alternatives</div>
-                <ul className="mt-2 space-y-2">
-                  {rec.alternatives.map((a, idx) => (
-                    <li key={idx} className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm">
-                      <div className="font-medium">{a.title}</div>
-                      <div className="text-slate-600 mt-1">{a.why}</div>
-                    </li>
-                  ))}
-                </ul>
+                    <label className="space-y-1">
+                      <div className="text-xs" style={{ color: "rgb(var(--muted))" }}>Resistance (1-5)</div>
+                      <input
+                        type="number"
+                        min={1}
+                        max={5}
+                        value={t.resistance}
+                        onChange={(e) => updateTask(idx, { resistance: parseInt(e.target.value || "3", 10) })}
+                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-300 dark:border-slate-700 dark:bg-slate-950"
+                      />
+                    </label>
+
+                    <label className="space-y-1">
+                      <div className="text-xs" style={{ color: "rgb(var(--muted))" }}>Deadline</div>
+                      <input
+                        type="date"
+                        min={todayISO()}
+                        value={t.deadline ?? ""}
+                        onChange={(e) => {
+                          const v = e.target.value || undefined;
+                          // Ignore past selections
+                          if (v && v < todayISO()) return;
+                          updateTask(idx, { deadline: v });
+                        }}
+                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-300 dark:border-slate-700 dark:bg-slate-950"
+                      />
+                    </label>
+
+                    <label className="space-y-1 md:col-span-4">
+                      <div className="text-xs" style={{ color: "rgb(var(--muted))" }}>
+                        Tags (comma separated) — e.g., work, health, admin
+                      </div>
+                      <input
+                        value={t.tagsText ?? ""}
+                        onChange={(e) => updateTask(idx, { tagsText: e.target.value })}
+                        placeholder="work, admin"
+                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-300 dark:border-slate-700 dark:bg-slate-950"
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => removeTask(idx)}
+                  className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:hover:bg-slate-900"
+                  title="Remove task"
+                >
+                  Remove
+                </button>
               </div>
-            )}
-          </CardContent>
-        </Card>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Actions */}
+      <div className="flex flex-wrap gap-3">
+        <button
+          onClick={computeRecommendation}
+          className="rounded-xl px-5 py-3 text-sm text-white gradient-brand hover:opacity-95"
+        >
+          Get recommendation
+        </button>
+
+        <button
+          onClick={saveDecision}
+          disabled={busy}
+          className="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm hover:bg-slate-50 disabled:opacity-60 dark:border-slate-800 dark:bg-slate-900 dark:hover:bg-slate-800"
+        >
+          Save to history
+        </button>
+
+        <button
+          onClick={addToDailyFocus}
+          disabled={busy}
+          className="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm hover:bg-slate-50 disabled:opacity-60 dark:border-slate-800 dark:bg-slate-900 dark:hover:bg-slate-800"
+        >
+          Add to Daily Focus
+        </button>
+      </div>
+
+      {/* Recommendation */}
+      {rec && (
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <div className="text-sm" style={{ color: "rgb(var(--muted))" }}>
+            Recommendation · Confidence {rec.confidence}%
+          </div>
+          <div className="mt-1 text-2xl font-semibold">{rec.selectedTaskTitle}</div>
+          <p className="mt-2 text-sm" style={{ color: "rgb(var(--muted))" }}>{rec.rationale}</p>
+
+          {rec.alternatives?.length > 0 && (
+            <div className="mt-4">
+              <div className="text-sm font-semibold">Alternatives</div>
+              <ul className="mt-2 list-disc pl-5 text-sm" style={{ color: "rgb(var(--muted))" }}>
+                {rec.alternatives.map((a) => (
+                  <li key={a}>{a}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+
+      {status && (
+        <div className="rounded-xl border border-slate-200 bg-white p-3 text-sm dark:border-slate-800 dark:bg-slate-900">
+          {status}
+        </div>
       )}
     </div>
   );
