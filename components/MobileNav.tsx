@@ -16,14 +16,18 @@ export function MobileNav() {
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-slate-200 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-950/80 lg:hidden">
-      <div className="mx-auto max-w-6xl px-3 py-2 flex justify-between">
+      <div className="mx-auto max-w-6xl px-3 py-2 flex justify-between gap-2">
         {items.map((it) => {
           const active = path === it.href;
           return (
             <Link
               key={it.href}
               href={it.href}
-              className={`px-2 py-2 text-xs rounded-xl ${active ? "text-white gradient-brand" : "text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-900"}`}
+              className={`flex-1 text-center px-2 py-2 text-xs rounded-xl ${
+                active
+                  ? "text-white gradient-brand"
+                  : "text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-900"
+              }`}
             >
               {it.label}
             </Link>
