@@ -11,11 +11,10 @@ export default function HomePage() {
           <div className="absolute top-10 right-10 h-80 w-80 rounded-full bg-violet-400/30 blur-3xl" />
           <div className="absolute -bottom-24 left-1/3 h-72 w-72 rounded-full bg-sky-400/25 blur-3xl" />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(99,102,241,0.16),transparent_45%),radial-gradient(circle_at_75%_30%,rgba(168,85,247,0.14),transparent_45%),radial-gradient(circle_at_55%_80%,rgba(14,165,233,0.12),transparent_45%)]" />
-          <div className="absolute inset-0 opacity-[0.06] [background-image:linear-gradient(to_right,rgba(15,23,42,0.15)_1px,transparent_1px),linear-gradient(to_bottom,rgba(15,23,42,0.15)_1px,transparent_1px)] [background-size:36px_36px] dark:opacity-[0.12]" />
         </div>
 
         <div className="relative p-10 md:p-12">
-          <div className="grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
+          <div className="grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
             {/* LEFT */}
             <div className="max-w-2xl">
               <div className="flex flex-wrap items-center gap-2">
@@ -31,7 +30,7 @@ export default function HomePage() {
                 </span>
               </div>
 
-              {/* Headline (NO underline) */}
+              {/* Headline (no underline) */}
               <h1 className="mt-7 text-4xl md:text-5xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
                 Decide your next move{" "}
                 <span className="block mt-2 text-3xl md:text-4xl font-semibold">
@@ -47,35 +46,11 @@ export default function HomePage() {
                 Get one clear next step — fast.
               </p>
 
-              <div className="mt-7 flex flex-wrap gap-3">
+              {/* CTA */}
+              <div className="mt-7">
                 <Link href="/app/decide" className="btn-brand">
                   Start now
                 </Link>
-                <Link
-                  href="/app/pricing"
-                  className="btn-ghost"
-                >
-                  Pricing
-                </Link>
-              </div>
-
-              <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                <div className="rounded-2xl border border-slate-200/70 bg-white/70 p-4 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-950/35">
-                  <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                    One best next step
-                  </div>
-                  <div className="mt-1 text-sm text-slate-600 dark:text-slate-300">
-                    Plus alternatives when it’s close.
-                  </div>
-                </div>
-                <div className="rounded-2xl border border-slate-200/70 bg-white/70 p-4 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-950/35">
-                  <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                    No login required
-                  </div>
-                  <div className="mt-1 text-sm text-slate-600 dark:text-slate-300">
-                    Log in only to save history.
-                  </div>
-                </div>
               </div>
             </div>
 
@@ -136,9 +111,7 @@ export default function HomePage() {
         ))}
       </section>
 
-      <footer className="text-sm text-slate-500 dark:text-slate-400">
-        © 2026 NextMove · Decision Assistant
-      </footer>
+      {/* NOTE: footer removed here on purpose (it exists in app/layout.tsx) */}
     </div>
   );
 }
