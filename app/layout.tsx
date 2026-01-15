@@ -15,23 +15,25 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <header className="sticky top-0 z-20 border-b border-slate-200/70 bg-white/70 backdrop-blur dark:border-slate-800 dark:bg-slate-950/60">
           <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2">
-              <Image src="/logo.png" alt="NextMove logo" width={32} height={32} priority />
-              <span className="text-lg font-semibold tracking-tight">NextMove</span>
+              <Image src="/logo.png" alt="NextMove logo" width={34} height={34} priority />
+              <div className="leading-tight">
+                <div className="text-base font-semibold tracking-tight">NextMove</div>
+                <div className="text-xs text-slate-500 dark:text-slate-400">Decision Assistant</div>
+              </div>
             </Link>
 
-            <nav className="flex items-center gap-4 text-sm">
-              <Link href="/app" className="hover:underline">App</Link>
-              <Link href="/pricing" className="hover:underline">Pricing</Link>
+            <nav className="flex items-center gap-4 text-sm text-slate-700 dark:text-slate-200">
+              <Link href="/app" className="hover:text-slate-900 dark:hover:text-white">App</Link>
+              <Link href="/pricing" className="hover:text-slate-900 dark:hover:text-white">Pricing</Link>
               <DarkModeToggle />
             </nav>
           </div>
         </header>
 
-        <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
+        <main className="mx-auto max-w-6xl px-4 py-10">{children}</main>
 
-        {/* Footer background matches page, no white strip */}
         <footer className="mt-12 py-6">
-          <div className="mx-auto max-w-6xl px-4 text-sm" style={{ color: "rgb(var(--muted))" }}>
+          <div className="mx-auto max-w-6xl px-4 text-sm text-slate-500 dark:text-slate-400">
             © {new Date().getFullYear()} NextMove · Decision Assistant
           </div>
         </footer>
