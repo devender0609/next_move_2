@@ -2,6 +2,7 @@ import "./globals.css";
 import Link from "next/link";
 import Image from "next/image";
 import { DarkModeToggle } from "@/components/DarkModeToggle";
+import { UserBadge } from "@/components/UserBadge";
 
 export const metadata = {
   title: "NextMove",
@@ -23,8 +24,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </Link>
 
             <nav className="flex items-center gap-4 text-sm text-slate-700 dark:text-slate-200">
-              <Link href="/app" className="hover:text-slate-900 dark:hover:text-white">App</Link>
-              <Link href="/pricing" className="hover:text-slate-900 dark:hover:text-white">Pricing</Link>
+              <Link href="/app" className="hover:text-slate-900 dark:hover:text-white">
+                App
+              </Link>
+              <Link href="/pricing" className="hover:text-slate-900 dark:hover:text-white">
+                Pricing
+              </Link>
+
+              {/* Logged-in indicator + Logout */}
+              <UserBadge />
+
               <DarkModeToggle />
             </nav>
           </div>

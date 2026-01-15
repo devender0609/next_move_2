@@ -5,8 +5,9 @@
 :root {
   --bg: 248 250 252;      /* slate-50 */
   --fg: 15 23 42;         /* slate-900 */
-  --card: 255 255 255;
+  --card: 255 255 255;    /* white */
   --muted: 100 116 139;   /* slate-500 */
+
   --brand1: 37 99 235;    /* blue-600 */
   --brand2: 124 58 237;   /* violet-600 */
 }
@@ -20,11 +21,12 @@ html, body {
   background: linear-gradient(135deg, rgb(var(--brand1)), rgb(var(--brand2)));
 }
 
+/* Dark mode tuned for readability */
 .dark {
-  --bg: 2 6 23;          /* slate-950 */
-  --fg: 226 232 240;     /* slate-200 */
-  --card: 15 23 42;      /* slate-900 */
-  --muted: 148 163 184;  /* slate-400 */
+  --bg: 3 7 18;           /* deep navy */
+  --fg: 226 232 240;      /* slate-200 */
+  --card: 17 24 39;       /* slate-900-ish */
+  --muted: 148 163 184;   /* slate-400 */
 }
 
 .dark body {
