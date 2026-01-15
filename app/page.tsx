@@ -4,13 +4,14 @@ export default function HomePage() {
   return (
     <div className="space-y-10">
       {/* HERO */}
-      <section className="relative overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        {/* background */}
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -right-24 -top-28 h-80 w-80 rounded-full blur-3xl opacity-25 gradient-brand" />
-          <div className="absolute -left-24 -bottom-28 h-80 w-80 rounded-full blur-3xl opacity-20 gradient-brand" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_20%,rgba(124,58,237,0.10),transparent_45%),radial-gradient(circle_at_70%_45%,rgba(37,99,235,0.10),transparent_45%)] dark:bg-[radial-gradient(circle_at_25%_20%,rgba(124,58,237,0.18),transparent_45%),radial-gradient(circle_at_70%_45%,rgba(37,99,235,0.18),transparent_45%)]" />
-          <div className="absolute inset-0 opacity-[0.06] [background-image:linear-gradient(to_right,rgba(15,23,42,0.15)_1px,transparent_1px),linear-gradient(to_bottom,rgba(15,23,42,0.15)_1px,transparent_1px)] [background-size:36px_36px] dark:opacity-[0.10]" />
+      <section className="relative overflow-hidden rounded-[28px] border border-slate-200/70 bg-white/70 shadow-sm backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-950/40">
+        {/* Aurora background */}
+        <div aria-hidden className="absolute inset-0 -z-10 overflow-hidden rounded-[28px]">
+          <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-indigo-400/35 blur-3xl" />
+          <div className="absolute top-10 right-10 h-80 w-80 rounded-full bg-violet-400/30 blur-3xl" />
+          <div className="absolute -bottom-24 left-1/3 h-72 w-72 rounded-full bg-sky-400/25 blur-3xl" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(99,102,241,0.16),transparent_45%),radial-gradient(circle_at_75%_30%,rgba(168,85,247,0.14),transparent_45%),radial-gradient(circle_at_55%_80%,rgba(14,165,233,0.12),transparent_45%)]" />
+          <div className="absolute inset-0 opacity-[0.06] [background-image:linear-gradient(to_right,rgba(15,23,42,0.15)_1px,transparent_1px),linear-gradient(to_bottom,rgba(15,23,42,0.15)_1px,transparent_1px)] [background-size:36px_36px] dark:opacity-[0.12]" />
         </div>
 
         <div className="relative p-10 md:p-12">
@@ -18,48 +19,69 @@ export default function HomePage() {
             {/* LEFT */}
             <div className="max-w-2xl">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/70 px-3 py-1 text-xs text-slate-700 backdrop-blur dark:border-slate-700 dark:bg-slate-950/40 dark:text-slate-200">
-                  <span className="h-2 w-2 rounded-full gradient-brand" />
+                <span className="inline-flex items-center gap-2 rounded-full border border-slate-200/70 bg-white/70 px-3 py-1 text-xs text-slate-700 shadow-sm backdrop-blur dark:border-slate-700 dark:bg-slate-950/40 dark:text-slate-200">
+                  <span className="h-2 w-2 rounded-full bg-gradient-to-r from-indigo-600 via-violet-600 to-sky-600" />
                   Decision Assistant
                 </span>
-                <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/70 px-3 py-1 text-xs text-slate-700 backdrop-blur dark:border-slate-700 dark:bg-slate-950/40 dark:text-slate-200">
+                <span className="inline-flex items-center gap-2 rounded-full border border-slate-200/70 bg-white/70 px-3 py-1 text-xs text-slate-700 shadow-sm backdrop-blur dark:border-slate-700 dark:bg-slate-950/40 dark:text-slate-200">
                   ⚡ Reduce decision fatigue
                 </span>
-                <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/70 px-3 py-1 text-xs text-slate-700 backdrop-blur dark:border-slate-700 dark:bg-slate-950/40 dark:text-slate-200">
+                <span className="inline-flex items-center gap-2 rounded-full border border-slate-200/70 bg-white/70 px-3 py-1 text-xs text-slate-700 shadow-sm backdrop-blur dark:border-slate-700 dark:bg-slate-950/40 dark:text-slate-200">
                   ⏱ 60 seconds to clarity
                 </span>
               </div>
 
-              {/* Fancy headline (no weird ___) */}
-              <h1 className="mt-6 text-4xl md:text-5xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
-                Decide your next move
+              {/* Headline (NO underline) */}
+              <h1 className="mt-7 text-4xl md:text-5xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
+                Decide your next move{" "}
                 <span className="block mt-2 text-3xl md:text-4xl font-semibold">
                   with{" "}
-                  <span className="relative inline-block">
-                    <span className="relative z-10">calm confidence</span>
-                    <span className="absolute -inset-x-2 -bottom-1 h-3 rounded-full opacity-25 gradient-brand" />
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-violet-600 to-sky-600">
+                    calm confidence
                   </span>
                   .
                 </span>
               </h1>
 
-              <p className="mt-4 max-w-xl text-base md:text-lg leading-relaxed text-slate-600 dark:text-slate-300">
+              <p className="mt-4 max-w-xl text-base md:text-lg leading-relaxed text-slate-700 dark:text-slate-200">
                 Get one clear next step — fast.
               </p>
 
               <div className="mt-7 flex flex-wrap gap-3">
-                <Link
-                  href="/app/decide"
-                  className="rounded-xl px-6 py-3 text-sm font-semibold text-white gradient-brand shadow-sm hover:opacity-95"
-                >
+                <Link href="/app/decide" className="btn-brand">
                   Start now
                 </Link>
+                <Link
+                  href="/app/pricing"
+                  className="btn-ghost"
+                >
+                  Pricing
+                </Link>
+              </div>
+
+              <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                <div className="rounded-2xl border border-slate-200/70 bg-white/70 p-4 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-950/35">
+                  <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                    One best next step
+                  </div>
+                  <div className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+                    Plus alternatives when it’s close.
+                  </div>
+                </div>
+                <div className="rounded-2xl border border-slate-200/70 bg-white/70 p-4 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-950/35">
+                  <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                    No login required
+                  </div>
+                  <div className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+                    Log in only to save history.
+                  </div>
+                </div>
               </div>
             </div>
 
             {/* RIGHT: How it works */}
             <div className="w-full">
-              <div className="rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-950/40">
+              <div className="panel">
                 <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
                   How it works
                 </div>
@@ -73,9 +95,9 @@ export default function HomePage() {
                   ].map(([n, t, d]) => (
                     <div
                       key={n}
-                      className="flex gap-3 rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900"
+                      className="flex gap-3 rounded-xl border border-slate-200/70 bg-white/70 p-3 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/60"
                     >
-                      <div className="flex h-7 w-7 items-center justify-center rounded-lg text-xs font-bold text-white gradient-brand">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg text-xs font-bold text-white bg-gradient-to-r from-indigo-600 via-violet-600 to-sky-600">
                         {n}
                       </div>
                       <div className="min-w-0">
@@ -90,7 +112,7 @@ export default function HomePage() {
                   ))}
                 </div>
 
-                <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200">
+                <div className="mt-5 rounded-xl border border-slate-200/70 bg-white/70 p-4 text-sm text-slate-700 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-200">
                   <span className="font-semibold">Pro tip:</span>{" "}
                   Keep tasks action-based (e.g., “Draft 3 slides”, not “Presentation”).
                 </div>
@@ -103,19 +125,20 @@ export default function HomePage() {
       {/* Value props */}
       <section className="grid gap-4 md:grid-cols-3">
         {[
-          ["No login required", "Use it instantly. Login only if you want to save."],
           ["Clear recommendations", "One best next step, plus alternatives."],
-          ["Built for momentum", "Less thinking. More doing."],
+          ["Daily focus", "Build momentum with simple streaks."],
+          ["Track what works", "Save outcomes to learn patterns."],
         ].map(([t, d]) => (
-          <div
-            key={t}
-            className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900"
-          >
+          <div key={t} className="card-soft">
             <div className="font-semibold text-slate-900 dark:text-slate-100">{t}</div>
             <div className="mt-2 text-sm text-slate-600 dark:text-slate-300">{d}</div>
           </div>
         ))}
       </section>
+
+      <footer className="text-sm text-slate-500 dark:text-slate-400">
+        © 2026 NextMove · Decision Assistant
+      </footer>
     </div>
   );
 }
