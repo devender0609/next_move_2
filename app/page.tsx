@@ -14,7 +14,6 @@ export default function HomePage() {
         </div>
 
         <div className="relative p-10 md:p-12">
-          {/* Make it less crowded: more whitespace, smaller type, tighter content */}
           <div className="grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
             {/* LEFT */}
             <div className="max-w-2xl">
@@ -31,13 +30,19 @@ export default function HomePage() {
                 </span>
               </div>
 
-              {/* ✅ reduced headline size */}
+              {/* Fancy headline (no weird ___) */}
               <h1 className="mt-6 text-4xl md:text-5xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
-                Decide your next move —
-                <span className="block">with calm confidence.</span>
+                Decide your next move
+                <span className="block mt-2 text-3xl md:text-4xl font-semibold">
+                  with{" "}
+                  <span className="relative inline-block">
+                    <span className="relative z-10">calm confidence</span>
+                    <span className="absolute -inset-x-2 -bottom-1 h-3 rounded-full opacity-25 gradient-brand" />
+                  </span>
+                  .
+                </span>
               </h1>
 
-              {/* ✅ removed the long paragraph per request */}
               <p className="mt-4 max-w-xl text-base md:text-lg leading-relaxed text-slate-600 dark:text-slate-300">
                 Get one clear next step — fast.
               </p>
@@ -50,11 +55,9 @@ export default function HomePage() {
                   Start now
                 </Link>
               </div>
-
-              {/* ✅ removed the 3 bullet/“●” lines */}
             </div>
 
-            {/* RIGHT: How it works (keep, but make cleaner) */}
+            {/* RIGHT: How it works */}
             <div className="w-full">
               <div className="rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-950/40">
                 <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
