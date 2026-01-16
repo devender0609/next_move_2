@@ -1,88 +1,43 @@
-import type { Metadata } from "next";
-import "./globals.css";
+// app/app/layout.tsx
 import Link from "next/link";
 import Image from "next/image";
 
-export const metadata: Metadata = {
-  title: "NextMove",
-  description: "Decision Assistant",
-};
-
-function ThemeScript() {
-  // Sets initial theme before paint (prevents flash)
-  const code = `
-(function () {
-  try {
-    var saved = localStorage.getItem("nm_theme");
-    var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-    var theme = saved || (prefersDark ? "dark" : "light");
-    document.documentElement.setAttribute("data-theme", theme);
-  } catch (e) {}
-})();
-`;
-  return <script dangerouslySetInnerHTML={{ __html: code }} />;
-}
-
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <ThemeScript />
-      </head>
-      <body>
-        <header className="site-header">
-          <div className="header-inner">
-            <Link href="/" className="brand" aria-label="NextMove Home">
-              <Image
-                src="/logo.png"
-                alt="NextMove logo"
-                width={28}
-                height={28}
-                priority
-              />
-              <div className="brand-text">
-                <div className="brand-title">NextMove</div>
-                <div className="brand-sub">Decision Assistant</div>
-              </div>
-            </Link>
+    <div className="app-shell">
+      <aside className="sidebar-card" aria-label="App navigation">
+        <div className="sidebar-brand">
+          <Link href="/app" className="brand-link" aria-label="Go to app overview">
+            <Image src="/logo.png" alt="NextMove" width={28} height={28} priority />
+            <div className="brand-text">
+              <div className="brand-title">NextMove</div>
+              <div className="brand-subtitle">Decision Assistant</div>
+            </div>
+          </Link>
+        </div>
 
-            <nav className="top-nav" aria-label="Top navigation">
-              <Link className="nav-link" href="/app">
-                App
-              </Link>
-              <Link className="nav-link" href="/pricing">
-                Pricing
-              </Link>
-              <Link className="nav-link" href="/app/login">
-                Login
-              </Link>
-              <button
-                className="nav-link"
-                type="button"
-                onClick={() => {
-                  const cur = document.documentElement.getAttribute("data-theme") || "light";
-                  const next = cur === "dark" ? "light" : "dark";
-                  document.documentElement.setAttribute("data-theme", next);
-                  try {
-                    localStorage.setItem("nm_theme", next);
-                  } catch {}
-                }}
-                aria-label="Toggle dark mode"
-              >
-                Dark
-              </button>
-            </nav>
-          </div>
-        </header>
+        <nav className="sidebar-nav">
+          <Link className="side-link" href="/app">
+            Overview
+          </Link>
+          <Link className="side-link" href="/app/decide">
+            New decision
+          </Link>
+          <Link className="side-link" href="/app/focus">
+            Daily focus
+          </Link>
+          <Link className="side-link" href="/app/history">
+            History
+          </Link>
+          <Link className="side-link" href="/app/login">
+            Login
+          </Link>
+        </nav>
+      </aside>
 
-        <main className="main">{children}</main>
-
-        <footer className="site-footer">
-          <div className="container">
-            © {new Date().getFullYear()} NextMove · Decision Assistant
-          </div>
-        </footer>
-      </body>
-    </html>
+      <main className="app-main" role="main">
+        {children}
+      </main>
+    </div>
   );
 }
