@@ -2,55 +2,86 @@ import "./globals.css";
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
+import Script from "next/script";
 
 export const metadata: Metadata = {
-  title: "NextMove · Decision Assistant",
-  description: "Decision clarity in under a minute.",
+  title: "NextMove",
+  description: "Decision Assistant",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="min-h-screen bg-app text-app">
-        <header className="sticky top-0 z-50 border-b border-skin bg-surface/70 backdrop-blur">
-          <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-            <Link href="/" className="flex items-center gap-3">
-              <Image
-                src="/logo.png"
-                alt="NextMove logo"
-                width={34}
-                height={34}
-                priority
-                className="rounded-md"
-              />
-              <div className="leading-tight">
-                <div className="text-base font-semibold tracking-tight">NextMove</div>
-                <div className="text-xs text-muted">Decision Assistant</div>
+      <body>
+        {/* Theme boot + toggle handler (no extra component files needed) */}
+        <Script id="theme-boot" strategy="beforeInteractive">{`
+          (function () {
+            try {
+              var saved = localStorage.getItem('nm_theme');
+              var theme = saved || 'light';
+              document.documentElement.setAttribute('data-theme', theme);
+            } catch(e) {}
+          })();
+        `}</Script>
+
+        <Script id="theme-toggle" strategy="afterInteractive">{`
+          (function () {
+            function setTheme(next) {
+              document.documentElement.setAttribute('data-theme', next);
+              try { localStorage.setItem('nm_theme', next); } catch(e) {}
+              var btn = document.getElementById('nm-theme-btn');
+              if (btn) btn.textContent = (next === 'dark') ? 'Light' : 'Dark';
+            }
+
+            function init() {
+              var current = document.documentElement.getAttribute('data-theme') || 'light';
+              var btn = document.getElementById('nm-theme-btn');
+              if (btn) btn.textContent = (current === 'dark') ? 'Light' : 'Dark';
+
+              document.addEventListener('click', function (e) {
+                var t = e.target;
+                if (!t) return;
+                if (t.id === 'nm-theme-btn') {
+                  var cur = document.documentElement.getAttribute('data-theme') || 'light';
+                  setTheme(cur === 'dark' ? 'light' : 'dark');
+                }
+              });
+            }
+
+            if (document.readyState === 'loading') {
+              document.addEventListener('DOMContentLoaded', init);
+            } else {
+              init();
+            }
+          })();
+        `}</Script>
+
+        <header className="site-header">
+          <div className="container header-inner">
+            <Link href="/" className="brand">
+              <Image src="/logo.png" alt="NextMove logo" width={34} height={34} priority />
+              <div className="brand-text">
+                <div className="brand-title">NextMove</div>
+                <div className="brand-sub">Decision Assistant</div>
               </div>
             </Link>
 
-            <nav className="flex items-center gap-2">
-              <Link href="/app/decide" className="btn-ghost">
-                App
-              </Link>
-              <Link href="/pricing" className="btn-ghost">
-                Pricing
-              </Link>
-              <Link href="/app/login" className="btn-ghost">
-                Login
-              </Link>
-              <button className="btn-ghost" type="button" aria-label="Toggle theme">
+            <nav className="top-nav">
+              <Link className="nav-link" href="/app/decide">App</Link>
+              <Link className="nav-link" href="/pricing">Pricing</Link>
+              <Link className="nav-link" href="/app/login">Login</Link>
+              <button id="nm-theme-btn" className="btn btn-ghost" type="button">
                 Dark
               </button>
             </nav>
           </div>
         </header>
 
-        <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
+        <main className="container main">{children}</main>
 
-        {/* Single footer globally (so it never duplicates on pages) */}
-        <footer className="border-t border-skin">
-          <div className="mx-auto max-w-6xl px-4 py-6 text-sm text-muted">
+        {/* ✅ Single footer (global) */}
+        <footer className="site-footer">
+          <div className="container">
             © {new Date().getFullYear()} NextMove · Decision Assistant
           </div>
         </footer>
