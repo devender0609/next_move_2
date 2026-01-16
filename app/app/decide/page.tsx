@@ -54,10 +54,7 @@ export default function DecidePage() {
   }
 
   function addTask() {
-    setTasks((prev) => [
-      ...prev,
-      { title: "", benefit: 3, energy: 3, hardness: 3, tags: "" },
-    ]);
+    setTasks((prev) => [...prev, { title: "", benefit: 3, energy: 3, hardness: 3, tags: "" }]);
   }
 
   function removeTask(idx: number) {
@@ -79,26 +76,18 @@ export default function DecidePage() {
   }
 
   function scoreTask(t: Task) {
-    // Higher benefit better; lower energy/hardness better.
-    // Small bias toward tasks that match low energy contexts.
     const energyBias = energyLevel === "Low" ? 0.4 : energyLevel === "High" ? -0.2 : 0.0;
     const timeBias = timeMinutes <= 15 ? 0.3 : timeMinutes >= 60 ? -0.1 : 0.0;
 
-    return (
-      t.benefit * 1.2 -
-      t.energy * (1.0 + energyBias) -
-      t.hardness * 0.9 +
-      timeBias
-    );
+    return t.benefit * 1.2 - t.energy * (1.0 + energyBias) - t.hardness * 0.9 + timeBias;
   }
 
   function computeConfidence(best: Task) {
-    // Simple heuristic: if it’s easy + high benefit → high confidence
     const ease = 6 - (best.energy + best.hardness) / 2;
     const strength = best.benefit + ease;
-    if (strength >= 8) return "High" as const;
-    if (strength >= 6.5) return "Medium" as const;
-    return "Low" as const;
+    if (strength >= 8) return "High";
+    if (strength >= 6.5) return "Medium";
+    return "Low";
   }
 
   function getRecommendation() {
@@ -126,16 +115,11 @@ export default function DecidePage() {
     const best = ranked[0];
     const alternatives = ranked.slice(1, 3).map((t) => t.title);
 
-    const confidence = computeConfidence(best);
-    const reason =
-      `Chosen because it balances high benefit with a manageable energy cost and “how hard it feels” ` +
-      `for your current mood (${mood}) and energy (${energyLevel}).`;
-
     setRecommendation({
       title: best.title,
-      reason,
+      reason: `Chosen because it balances benefit with a manageable energy cost and resistance for your current mood (${mood}) and energy (${energyLevel}).`,
       alternatives,
-      confidence,
+      confidence: computeConfidence(best),
     });
   }
 
@@ -151,261 +135,177 @@ export default function DecidePage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-8">
-        {/* Sidebar */}
-        <aside className="sidebar-card">
-          <div className="sidebar-nav">
-            <a className="side-link" href="/app">Overview</a>
-            <a className="side-link side-link-active" href="/app/decide">New decision</a>
-            <a className="side-link" href="/app/focus">Daily focus</a>
-            <a className="side-link" href="/app/history">History</a>
-            <a className="side-link" href="/app/login">Login</a>
-          </div>
-        </aside>
+      {/* ✅ Full-width content (no duplicate sidebar/grid) */}
+      <section className="space-y-6">
+        <div className="card">
+          <div className="card-title">Decision context</div>
+          <div className="card-sub">Keep it simple — this just helps tailor the next step.</div>
 
-        {/* Main */}
-        <section className="space-y-6">
-          {/* Context selection */}
-          <div className="card">
-            <div className="card-title-row">
-              <div>
-                <div className="card-title">Decision context</div>
-                <div className="card-sub">Keep it simple — this just helps tailor the next step.</div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+            <div>
+              <div className="label">Decision domain</div>
+              <div className="chip-row">
+                {domains.map((d) => (
+                  <button key={d} type="button" className={`chip ${d === domain ? "chip-on" : ""}`} onClick={() => setDomain(d)}>
+                    {d}
+                  </button>
+                ))}
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-              <div>
-                <div className="label">Decision domain</div>
-                <div className="chip-row">
-                  {domains.map((d) => (
-                    <button
-                      key={d}
-                      type="button"
-                      className={`chip ${d === domain ? "chip-on" : ""}`}
-                      onClick={() => setDomain(d)}
-                    >
-                      {d}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <div className="label">How do you feel?</div>
-                <div className="chip-row">
-                  {moods.map((m) => (
-                    <button
-                      key={m}
-                      type="button"
-                      className={`chip ${m === mood ? "chip-on" : ""}`}
-                      onClick={() => setMood(m)}
-                    >
-                      {m}
-                    </button>
-                  ))}
-                </div>
+            <div>
+              <div className="label">How do you feel?</div>
+              <div className="chip-row">
+                {moods.map((m) => (
+                  <button key={m} type="button" className={`chip ${m === mood ? "chip-on" : ""}`} onClick={() => setMood(m)}>
+                    {m}
+                  </button>
+                ))}
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Templates */}
-          <div className="card">
-            <div className="card-title">Templates</div>
-            <div className="card-sub">Start with a preset and edit in seconds.</div>
+        <div className="card">
+          <div className="card-title">Templates</div>
+          <div className="card-sub">Start with a preset and edit in seconds.</div>
 
-            <div className="chip-row mt-3">
-              {templates.map((t) => (
-                <button
-                  key={t.label}
-                  type="button"
-                  className="chip"
-                  onClick={() => {
-                    setDomain(t.domain);
-                    setMood(t.mood);
-                    setGoal(t.goal);
-                    clearResult();
-                  }}
-                >
-                  {t.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Goal & constraints */}
-          <div className="card">
-            <div className="card-title">Context</div>
-
-            <div className="mt-4 space-y-4">
-              <div>
-                <div className="label">Goal</div>
-                <input
-                  className="input"
-                  placeholder="e.g., Feel less overwhelmed about this decision"
-                  value={goal}
-                  onChange={(e) => setGoal(e.target.value)}
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <div className="label">Time available (minutes)</div>
-                  <input
-                    className="input"
-                    type="number"
-                    min={5}
-                    max={240}
-                    value={timeMinutes}
-                    onChange={(e) => setTimeMinutes(Number(e.target.value || 0))}
-                  />
-                </div>
-
-                <div>
-                  <div className="label">Energy</div>
-                  <select className="input" value={energyLevel} onChange={(e) => setEnergyLevel(e.target.value)}>
-                    <option>Low</option>
-                    <option>Medium</option>
-                    <option>High</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Tasks */}
-          <div className="card">
-            <div className="card-title-row">
-              <div>
-                <div className="card-title">Tasks</div>
-                <div className="card-sub">
-                  Benefit = upside. Energy cost = time/effort. How hard it feels = resistance.
-                </div>
-              </div>
-
-              <button type="button" className="btn btn-primary" onClick={addTask}>
-                + Add task
+          <div className="chip-row mt-3">
+            {templates.map((t) => (
+              <button
+                key={t.label}
+                type="button"
+                className="chip"
+                onClick={() => {
+                  setDomain(t.domain);
+                  setMood(t.mood);
+                  setGoal(t.goal);
+                  clearResult();
+                }}
+              >
+                {t.label}
               </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="card-title">Context</div>
+
+          <div className="mt-4 space-y-4">
+            <div>
+              <div className="label">Goal</div>
+              <input className="input" placeholder="e.g., Feel less overwhelmed about this decision" value={goal} onChange={(e) => setGoal(e.target.value)} />
             </div>
 
-            <div className="mt-4 space-y-4">
-              {tasks.map((t, idx) => (
-                <div key={idx} className="task-card">
-                  <div className="task-top">
-                    <div className="label">Task title</div>
-                    <button className="btn btn-ghost" type="button" onClick={() => removeTask(idx)}>
-                      Remove
-                    </button>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <div className="label">Time available (minutes)</div>
+                <input className="input" type="number" min={5} max={240} value={timeMinutes} onChange={(e) => setTimeMinutes(Number(e.target.value || 0))} />
+              </div>
+
+              <div>
+                <div className="label">Energy</div>
+                <select className="input" value={energyLevel} onChange={(e) => setEnergyLevel(e.target.value)}>
+                  <option>Low</option>
+                  <option>Medium</option>
+                  <option>High</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="card-title-row">
+            <div>
+              <div className="card-title">Tasks</div>
+              <div className="card-sub">Benefit = upside. Energy cost = time/effort. How hard it feels = resistance.</div>
+            </div>
+
+            <button type="button" className="btn btn-primary" onClick={addTask}>
+              + Add task
+            </button>
+          </div>
+
+          <div className="mt-4 space-y-4">
+            {tasks.map((t, idx) => (
+              <div key={idx} className="task-card">
+                <div className="task-top">
+                  <div className="label">Task title</div>
+                  <button className="btn btn-ghost" type="button" onClick={() => removeTask(idx)}>
+                    Remove
+                  </button>
+                </div>
+
+                <input className="input" placeholder="e.g., Draft 3 slides" value={t.title} onChange={(e) => updateTask(idx, { title: e.target.value })} />
+
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mt-3">
+                  <div>
+                    <div className="label">Benefit (1–5)</div>
+                    <input className="input" type="number" min={1} max={5} value={t.benefit} onChange={(e) => updateTask(idx, { benefit: Number(e.target.value || 3) })} />
                   </div>
 
-                  <input
-                    className="input"
-                    placeholder={domain === "Relationships" ? "e.g., Send a kind check-in text" : "e.g., Draft 3 slides"}
-                    value={t.title}
-                    onChange={(e) => updateTask(idx, { title: e.target.value })}
-                  />
-
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mt-3">
-                    <div>
-                      <div className="label">Benefit (1–5)</div>
-                      <input
-                        className="input"
-                        type="number"
-                        min={1}
-                        max={5}
-                        value={t.benefit}
-                        onChange={(e) => updateTask(idx, { benefit: Number(e.target.value || 3) })}
-                      />
-                    </div>
-
-                    <div>
-                      <div className="label">Energy cost (1–5)</div>
-                      <input
-                        className="input"
-                        type="number"
-                        min={1}
-                        max={5}
-                        value={t.energy}
-                        onChange={(e) => updateTask(idx, { energy: Number(e.target.value || 3) })}
-                      />
-                    </div>
-
-                    <div>
-                      <div className="label">How hard it feels (1–5)</div>
-                      <input
-                        className="input"
-                        type="number"
-                        min={1}
-                        max={5}
-                        value={t.hardness}
-                        onChange={(e) => updateTask(idx, { hardness: Number(e.target.value || 3) })}
-                      />
-                    </div>
-
-                    <div>
-                      <div className="label">Deadline (optional)</div>
-                      <input
-                        className="input"
-                        type="date"
-                        value={t.deadline || ""}
-                        onChange={(e) => updateTask(idx, { deadline: e.target.value })}
-                      />
-                    </div>
+                  <div>
+                    <div className="label">Energy cost (1–5)</div>
+                    <input className="input" type="number" min={1} max={5} value={t.energy} onChange={(e) => updateTask(idx, { energy: Number(e.target.value || 3) })} />
                   </div>
 
-                  <div className="mt-3">
-                    <div className="label">Tags (comma separated)</div>
-                    <input
-                      className="input"
-                      placeholder="e.g., relationships, family, health"
-                      value={t.tags || ""}
-                      onChange={(e) => updateTask(idx, { tags: e.target.value })}
-                    />
+                  <div>
+                    <div className="label">How hard it feels (1–5)</div>
+                    <input className="input" type="number" min={1} max={5} value={t.hardness} onChange={(e) => updateTask(idx, { hardness: Number(e.target.value || 3) })} />
+                  </div>
+
+                  <div>
+                    <div className="label">Deadline (optional)</div>
+                    <input className="input" type="date" value={t.deadline || ""} onChange={(e) => updateTask(idx, { deadline: e.target.value })} />
                   </div>
                 </div>
-              ))}
-            </div>
 
-            <div className="mt-6 flex flex-wrap gap-3">
-              <button type="button" className="btn btn-primary" onClick={getRecommendation}>
-                Get recommendation
-              </button>
-              <button type="button" className="btn btn-ghost" onClick={clearResult}>
-                Clear result
-              </button>
-              <button type="button" className="btn btn-ghost" onClick={resetAll}>
-                Reset
-              </button>
-            </div>
-
-            {/* Result panel */}
-            {recommendation && (
-              <div className="result-card mt-6">
-                <div className="result-title">Your best next step</div>
-                <div className="result-main">{recommendation.title}</div>
-                <div className="result-reason">{recommendation.reason}</div>
-
-                <div className="result-meta">
-                  <span className={`badge badge-${recommendation.confidence.toLowerCase()}`}>
-                    Confidence: {recommendation.confidence}
-                  </span>
+                <div className="mt-3">
+                  <div className="label">Tags (comma separated)</div>
+                  <input className="input" placeholder="e.g., relationships, family, health" value={t.tags || ""} onChange={(e) => updateTask(idx, { tags: e.target.value })} />
                 </div>
-
-                {recommendation.alternatives.length > 0 && (
-                  <div className="result-alt">
-                    <div className="result-alt-title">Alternatives</div>
-                    <ul className="list-disc pl-5">
-                      {recommendation.alternatives.map((a) => (
-                        <li key={a}>{a}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
               </div>
-            )}
+            ))}
           </div>
-        </section>
-      </div>
+
+          <div className="mt-6 flex flex-wrap gap-3">
+            <button type="button" className="btn btn-primary" onClick={getRecommendation}>
+              Get recommendation
+            </button>
+            <button type="button" className="btn btn-ghost" onClick={clearResult}>
+              Clear result
+            </button>
+            <button type="button" className="btn btn-ghost" onClick={resetAll}>
+              Reset
+            </button>
+          </div>
+
+          {recommendation && (
+            <div className="result-card mt-6">
+              <div className="result-title">Your best next step</div>
+              <div className="result-main">{recommendation.title}</div>
+              <div className="result-reason">{recommendation.reason}</div>
+
+              <div className="result-meta">
+                <span className={`badge badge-${recommendation.confidence.toLowerCase()}`}>Confidence: {recommendation.confidence}</span>
+              </div>
+
+              {recommendation.alternatives.length > 0 && (
+                <div className="result-alt">
+                  <div className="result-alt-title">Alternatives</div>
+                  <ul className="list-disc pl-5">
+                    {recommendation.alternatives.map((a) => (
+                      <li key={a}>{a}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </section>
     </div>
   );
 }
