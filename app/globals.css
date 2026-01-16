@@ -2,71 +2,112 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Base */
+/* ---- Design tokens (light) ---- */
 :root {
-  --bg: 248 250 252;      /* slate-50 */
-  --fg: 15 23 42;         /* slate-900 */
-  --border: 226 232 240;  /* slate-200 */
+  --bg: 248 250 252;          /* slate-50 */
+  --text: 15 23 42;           /* slate-900 */
+  --muted: 100 116 139;       /* slate-500 */
+
+  --surface: 255 255 255;     /* white */
+  --surface2: 248 250 252;    /* slate-50 */
+  --border: 226 232 240;      /* slate-200 */
+
+  --accent: 99 102 241;       /* indigo-500 */
+  --accent2: 168 85 247;      /* purple-500 */
+  --accent3: 34 211 238;      /* cyan-400 */
 }
 
-html, body {
-  background: rgb(var(--bg));
-  color: rgb(var(--fg));
-}
-
-/* -------- Buttons -------- */
-.btn-brand {
-  @apply inline-flex items-center justify-center rounded-xl px-6 py-3 text-sm font-semibold text-white shadow-sm transition;
-  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 55%, #2563eb 100%);
-}
-.btn-brand:hover { filter: brightness(1.03); }
-.btn-brand:active { transform: translateY(0.5px); }
-
-.btn-ghost {
-  @apply inline-flex items-center justify-center rounded-xl border border-slate-200/80 bg-white/70 px-6 py-3 text-sm font-semibold text-slate-800 shadow-sm backdrop-blur transition hover:bg-white;
-}
-.dark .btn-ghost {
-  @apply border-slate-800 bg-slate-950/40 text-slate-100 hover:bg-slate-900;
-}
-
-/* -------- Cards / Panels -------- */
-.card-soft {
-  @apply rounded-2xl border border-slate-200 bg-white p-6 shadow-sm;
-}
-.dark .card-soft {
-  @apply border-slate-800 bg-slate-900;
-}
-
-.panel {
-  @apply rounded-2xl border border-slate-200/70 bg-white/70 p-6 shadow-sm backdrop-blur;
-}
-.dark .panel {
-  @apply border-slate-800 bg-slate-950/40;
-}
-
-/* -------- Dark mode readability -------- */
+/* ---- Dark tokens ---- */
 .dark {
-  --bg: 2 6 23; /* deep navy */
-  --fg: 241 245 249; /* slate-100 */
-  --border: 51 65 85; /* slate-700 */
+  --bg: 2 6 23;               /* slate-950 */
+  --text: 226 232 240;        /* slate-200 */
+  --muted: 148 163 184;       /* slate-400 */
+
+  --surface: 10 15 28;        /* custom deep */
+  --surface2: 15 23 42;       /* slate-900 */
+  --border: 30 41 59;         /* slate-800 */
 }
 
-.dark body {
+html,
+body {
+  height: 100%;
+}
+
+body {
   background: rgb(var(--bg));
-  color: rgb(var(--fg));
+  color: rgb(var(--text));
 }
 
-/* Inputs */
-::placeholder {
-  color: rgba(148, 163, 184, 0.95);
-}
-.dark ::placeholder {
-  color: rgba(203, 213, 225, 0.72);
+/* Helpers */
+.bg-app { background: rgb(var(--bg)); }
+.text-app { color: rgb(var(--text)); }
+.text-muted { color: rgb(var(--muted)); }
+.bg-surface { background: rgb(var(--surface)); }
+.bg-surface2 { background: rgb(var(--surface2)); }
+.border-skin { border-color: rgb(var(--border)); }
+
+.bg-accent { background: rgb(var(--accent)); }
+.bg-accent2 { background: rgb(var(--accent2)); }
+.bg-accent3 { background: rgb(var(--accent3)); }
+
+.shadow-soft {
+  box-shadow: 0 12px 30px rgba(2, 6, 23, 0.08);
 }
 
-/* Make form text readable in dark mode */
-.dark input,
-.dark textarea,
-.dark select {
-  color: rgba(241, 245, 249, 0.95);
+/* Components */
+@layer components {
+  .card {
+    @apply rounded-3xl border border-skin bg-surface text-app shadow-soft;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-2xl px-5 py-3 text-sm font-semibold text-white shadow-soft transition;
+    background: linear-gradient(90deg, rgb(var(--accent)), rgb(var(--accent2)));
+  }
+  .btn-primary:hover { filter: brightness(1.05); }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-2xl border border-skin bg-surface px-5 py-3 text-sm font-semibold text-app shadow-soft transition;
+  }
+  .btn-secondary:hover { background: rgb(var(--surface2)); }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center rounded-xl border border-transparent bg-transparent px-3 py-2 text-sm text-muted transition;
+  }
+  .btn-ghost:hover { @apply border-skin; background: rgb(var(--surface2)); color: rgb(var(--text)); }
+
+  .pill {
+    @apply rounded-full border border-skin bg-surface2 px-3 py-2 text-xs font-semibold text-app transition;
+  }
+  .pill:hover { background: rgb(var(--surface)); }
+
+  .label {
+    @apply text-xs font-semibold text-muted;
+  }
+
+  .input {
+    @apply mt-1 w-full rounded-xl border border-skin bg-surface px-3 py-2 text-sm text-app outline-none transition;
+  }
+  .input:focus {
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.18);
+    border-color: rgb(var(--accent));
+  }
+
+  .navlink {
+    @apply rounded-xl border border-transparent px-3 py-2 text-sm text-app transition;
+  }
+  .navlink:hover { @apply border-skin; background: rgb(var(--surface2)); }
+}
+
+/* Dark mode readability tweaks:
+   Ensure cards and inputs remain high-contrast on dark background. */
+.dark .card {
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.35);
+}
+.dark .btn-secondary,
+.dark .input {
+  background: rgb(var(--surface2));
+}
+.dark .pill {
+  background: rgb(var(--surface2));
 }

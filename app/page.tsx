@@ -1,117 +1,128 @@
 import Link from "next/link";
 
+function Badge({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="inline-flex items-center gap-2 rounded-full border border-skin bg-surface/60 px-3 py-1 text-xs text-muted shadow-sm">
+      <span className="h-2 w-2 rounded-full bg-accent" />
+      {children}
+    </span>
+  );
+}
+
+function FeatureCard({ title, desc }: { title: string; desc: string }) {
+  return (
+    <div className="card p-5">
+      <div className="text-sm font-semibold">{title}</div>
+      <div className="mt-1 text-sm text-muted">{desc}</div>
+    </div>
+  );
+}
+
+function HeroGraphics() {
+  // Pure SVG “graphics” so you don’t need extra files.
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden rounded-3xl">
+      {/* subtle grid */}
+      <svg className="absolute inset-0 h-full w-full opacity-[0.18] dark:opacity-[0.12]" viewBox="0 0 800 400" preserveAspectRatio="none">
+        <defs>
+          <pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse">
+            <path d="M 24 0 L 0 0 0 24" fill="none" stroke="currentColor" strokeWidth="1" />
+          </pattern>
+          <linearGradient id="wash" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stopColor="rgba(99,102,241,0.35)" />
+            <stop offset="0.55" stopColor="rgba(168,85,247,0.22)" />
+            <stop offset="1" stopColor="rgba(34,211,238,0.18)" />
+          </linearGradient>
+        </defs>
+        <rect width="800" height="400" fill="url(#wash)" />
+        <rect width="800" height="400" fill="url(#grid)" />
+      </svg>
+
+      {/* floating blobs */}
+      <div className="absolute -left-24 -top-24 h-64 w-64 rounded-full bg-accent/25 blur-3xl" />
+      <div className="absolute -right-20 top-6 h-72 w-72 rounded-full bg-accent2/25 blur-3xl" />
+      <div className="absolute left-1/3 -bottom-28 h-72 w-72 rounded-full bg-accent3/20 blur-3xl" />
+    </div>
+  );
+}
+
 export default function HomePage() {
   return (
     <div className="space-y-10">
       {/* HERO */}
-      <section className="relative overflow-hidden rounded-[28px] border border-slate-200/70 bg-white/70 shadow-sm backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-950/40">
-        {/* Aurora background */}
-        <div aria-hidden className="absolute inset-0 -z-10 overflow-hidden rounded-[28px]">
-          <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-indigo-400/35 blur-3xl" />
-          <div className="absolute top-10 right-10 h-80 w-80 rounded-full bg-violet-400/30 blur-3xl" />
-          <div className="absolute -bottom-24 left-1/3 h-72 w-72 rounded-full bg-sky-400/25 blur-3xl" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(99,102,241,0.16),transparent_45%),radial-gradient(circle_at_75%_30%,rgba(168,85,247,0.14),transparent_45%),radial-gradient(circle_at_55%_80%,rgba(14,165,233,0.12),transparent_45%)]" />
-        </div>
+      <section className="relative overflow-hidden rounded-3xl border border-skin bg-surface shadow-soft">
+        <HeroGraphics />
 
-        <div className="relative p-10 md:p-12">
-          <div className="grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
-            {/* LEFT */}
-            <div className="max-w-2xl">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-2 rounded-full border border-slate-200/70 bg-white/70 px-3 py-1 text-xs text-slate-700 shadow-sm backdrop-blur dark:border-slate-700 dark:bg-slate-950/40 dark:text-slate-200">
-                  <span className="h-2 w-2 rounded-full bg-gradient-to-r from-indigo-600 via-violet-600 to-sky-600" />
-                  Decision Assistant
-                </span>
-                <span className="inline-flex items-center gap-2 rounded-full border border-slate-200/70 bg-white/70 px-3 py-1 text-xs text-slate-700 shadow-sm backdrop-blur dark:border-slate-700 dark:bg-slate-950/40 dark:text-slate-200">
-                  ⚡ Reduce decision fatigue
-                </span>
-                <span className="inline-flex items-center gap-2 rounded-full border border-slate-200/70 bg-white/70 px-3 py-1 text-xs text-slate-700 shadow-sm backdrop-blur dark:border-slate-700 dark:bg-slate-950/40 dark:text-slate-200">
-                  ⏱ 60 seconds to clarity
-                </span>
-              </div>
-
-              {/* Headline (no underline) */}
-              <h1 className="mt-7 text-4xl md:text-5xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
-                Decide your next move{" "}
-                <span className="block mt-2 text-3xl md:text-4xl font-semibold">
-                  with{" "}
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-violet-600 to-sky-600">
-                    calm confidence
-                  </span>
-                  .
-                </span>
-              </h1>
-
-              <p className="mt-4 max-w-xl text-base md:text-lg leading-relaxed text-slate-700 dark:text-slate-200">
-                Get one clear next step — fast.
-              </p>
-
-              {/* CTA */}
-              <div className="mt-7">
-                <Link href="/app/decide" className="btn-brand">
-                  Start now
-                </Link>
-              </div>
+        <div className="relative grid gap-8 p-6 md:grid-cols-2 md:p-10">
+          <div>
+            <div className="flex flex-wrap gap-2">
+              <Badge>Decision Assistant</Badge>
+              <Badge>Reduce decision fatigue</Badge>
+              <Badge>60 seconds to clarity</Badge>
             </div>
 
-            {/* RIGHT: How it works */}
-            <div className="w-full">
-              <div className="panel">
-                <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                  How it works
-                </div>
+            <h1 className="mt-6 text-4xl font-extrabold tracking-tight md:text-5xl">
+              Decide your next move{" "}
+              <span className="bg-gradient-to-r from-[rgb(99,102,241)] via-[rgb(168,85,247)] to-[rgb(34,211,238)] bg-clip-text text-transparent">
+                with calm confidence
+              </span>
+              .
+            </h1>
 
-                <div className="mt-4 space-y-3">
-                  {[
-                    ["1", "Add your goal", "What outcome are you aiming for?"],
-                    ["2", "List a few tasks", "Include impact, effort, and resistance."],
-                    ["3", "Get one best next step", "With confidence + alternatives."],
-                    ["4", "Save & track outcomes", "Build history and learn what works."],
-                  ].map(([n, t, d]) => (
-                    <div
-                      key={n}
-                      className="flex gap-3 rounded-xl border border-slate-200/70 bg-white/70 p-3 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/60"
-                    >
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg text-xs font-bold text-white bg-gradient-to-r from-indigo-600 via-violet-600 to-sky-600">
-                        {n}
-                      </div>
-                      <div className="min-w-0">
-                        <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                          {t}
-                        </div>
-                        <div className="text-xs text-slate-600 dark:text-slate-300">
-                          {d}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+            <p className="mt-4 max-w-xl text-base text-muted md:text-lg">
+              Get one clear next step — fast.
+            </p>
 
-                <div className="mt-5 rounded-xl border border-slate-200/70 bg-white/70 p-4 text-sm text-slate-700 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-200">
-                  <span className="font-semibold">Pro tip:</span>{" "}
-                  Keep tasks action-based (e.g., “Draft 3 slides”, not “Presentation”).
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Link href="/app/decide" className="btn-primary">
+                Start now
+              </Link>
+              <Link href="#how-it-works" className="btn-secondary">
+                How it works
+              </Link>
+            </div>
+
+            <div className="mt-6 text-xs text-muted">
+              No pressure to log in. Use it instantly — log in only if you want to save history.
+            </div>
+          </div>
+
+          {/* HOW IT WORKS box */}
+          <div id="how-it-works" className="card p-6 md:p-7">
+            <div className="text-sm font-semibold">How it works</div>
+
+            <div className="mt-4 space-y-3">
+              {[
+                { n: "1", t: "Pick a domain + mood", d: "Work, health, relationships… and how you feel right now." },
+                { n: "2", t: "Add your goal", d: "What outcome are you aiming for?" },
+                { n: "3", t: "List a few tasks", d: "Include effort, impact, and emotional friction." },
+                { n: "4", t: "Get one best next step", d: "Plus alternatives — and a confidence check." },
+              ].map((x) => (
+                <div key={x.n} className="flex items-start gap-3 rounded-2xl border border-skin bg-surface2 px-4 py-3">
+                  <div className="grid h-8 w-8 place-items-center rounded-xl bg-accent text-white text-sm font-bold">
+                    {x.n}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-sm font-semibold">{x.t}</div>
+                    <div className="text-sm text-muted">{x.d}</div>
+                  </div>
                 </div>
+              ))}
+
+              <div className="rounded-2xl border border-skin bg-surface2 px-4 py-3 text-sm text-muted">
+                Pro tip: Keep tasks action-based (e.g., “Draft 3 slides” not “Presentation”).
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Value props */}
+      {/* VALUE CARDS */}
       <section className="grid gap-4 md:grid-cols-3">
-        {[
-          ["Clear recommendations", "One best next step, plus alternatives."],
-          ["Daily focus", "Build momentum with simple streaks."],
-          ["Track what works", "Save outcomes to learn patterns."],
-        ].map(([t, d]) => (
-          <div key={t} className="card-soft">
-            <div className="font-semibold text-slate-900 dark:text-slate-100">{t}</div>
-            <div className="mt-2 text-sm text-slate-600 dark:text-slate-300">{d}</div>
-          </div>
-        ))}
+        <FeatureCard title="Clear recommendations" desc="One best next step, plus a couple smart alternatives." />
+        <FeatureCard title="Daily focus" desc="Build momentum with simple streaks (optional)." />
+        <FeatureCard title="Track what works" desc="Save outcomes to learn patterns over time." />
       </section>
-
-      {/* NOTE: footer removed here on purpose (it exists in app/layout.tsx) */}
     </div>
   );
 }
