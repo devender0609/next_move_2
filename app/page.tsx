@@ -1,128 +1,128 @@
+// app/page.tsx
 import Link from "next/link";
-
-function Badge({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="inline-flex items-center gap-2 rounded-full border border-skin bg-surface/60 px-3 py-1 text-xs text-muted shadow-sm">
-      <span className="h-2 w-2 rounded-full bg-accent" />
-      {children}
-    </span>
-  );
-}
-
-function FeatureCard({ title, desc }: { title: string; desc: string }) {
-  return (
-    <div className="card p-5">
-      <div className="text-sm font-semibold">{title}</div>
-      <div className="mt-1 text-sm text-muted">{desc}</div>
-    </div>
-  );
-}
-
-function HeroGraphics() {
-  // Pure SVG “graphics” so you don’t need extra files.
-  return (
-    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden rounded-3xl">
-      {/* subtle grid */}
-      <svg className="absolute inset-0 h-full w-full opacity-[0.18] dark:opacity-[0.12]" viewBox="0 0 800 400" preserveAspectRatio="none">
-        <defs>
-          <pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse">
-            <path d="M 24 0 L 0 0 0 24" fill="none" stroke="currentColor" strokeWidth="1" />
-          </pattern>
-          <linearGradient id="wash" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor="rgba(99,102,241,0.35)" />
-            <stop offset="0.55" stopColor="rgba(168,85,247,0.22)" />
-            <stop offset="1" stopColor="rgba(34,211,238,0.18)" />
-          </linearGradient>
-        </defs>
-        <rect width="800" height="400" fill="url(#wash)" />
-        <rect width="800" height="400" fill="url(#grid)" />
-      </svg>
-
-      {/* floating blobs */}
-      <div className="absolute -left-24 -top-24 h-64 w-64 rounded-full bg-accent/25 blur-3xl" />
-      <div className="absolute -right-20 top-6 h-72 w-72 rounded-full bg-accent2/25 blur-3xl" />
-      <div className="absolute left-1/3 -bottom-28 h-72 w-72 rounded-full bg-accent3/20 blur-3xl" />
-    </div>
-  );
-}
 
 export default function HomePage() {
   return (
-    <div className="space-y-10">
-      {/* HERO */}
-      <section className="relative overflow-hidden rounded-3xl border border-skin bg-surface shadow-soft">
-        <HeroGraphics />
+    <main className="min-h-[calc(100vh-72px)] bg-slate-50">
+      <section className="mx-auto max-w-6xl px-4 pt-10 pb-10">
+        <div className="rounded-3xl border border-slate-200 bg-gradient-to-br from-white via-indigo-50 to-sky-100/60 p-6 md:p-10 shadow-sm">
+          <div className="grid gap-8 md:grid-cols-2 md:items-start">
+            {/* LEFT */}
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/70 px-3 py-1 text-xs font-medium text-slate-700 shadow-sm">
+                  <span className="h-2 w-2 rounded-full bg-indigo-500" />
+                  Decision Assistant
+                </span>
+                <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/70 px-3 py-1 text-xs font-medium text-slate-700 shadow-sm">
+                  <span className="text-[13px]">⚡</span>
+                  Reduce decision fatigue
+                </span>
+                <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/70 px-3 py-1 text-xs font-medium text-slate-700 shadow-sm">
+                  <span className="text-[13px]">⏱</span>
+                  60 seconds to clarity
+                </span>
+              </div>
 
-        <div className="relative grid gap-8 p-6 md:grid-cols-2 md:p-10">
-          <div>
-            <div className="flex flex-wrap gap-2">
-              <Badge>Decision Assistant</Badge>
-              <Badge>Reduce decision fatigue</Badge>
-              <Badge>60 seconds to clarity</Badge>
+              <h1 className="mt-6 text-4xl font-semibold tracking-tight text-slate-900 md:text-5xl">
+                Decide your next move <br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-sky-600">
+                  with calm confidence.
+                </span>
+              </h1>
+
+              {/* Removed the circled tagline line here */}
+
+              <div className="mt-8 flex flex-wrap items-center gap-3">
+                <Link
+                  href="/app/decide"
+                  className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-5 py-3 text-sm font-semibold text-white shadow-md shadow-indigo-600/20 transition hover:brightness-110 active:brightness-95"
+                >
+                  Start now
+                </Link>
+
+                {/* Removed the circled "How it works" button */}
+              </div>
+
+              {/* Removed the circled login/no-pressure helper text */}
             </div>
 
-            <h1 className="mt-6 text-4xl font-extrabold tracking-tight md:text-5xl">
-              Decide your next move{" "}
-              <span className="bg-gradient-to-r from-[rgb(99,102,241)] via-[rgb(168,85,247)] to-[rgb(34,211,238)] bg-clip-text text-transparent">
-                with calm confidence
-              </span>
-              .
-            </h1>
+            {/* RIGHT */}
+            <div className="rounded-2xl border border-slate-200 bg-white/70 p-5 shadow-sm">
+              <div className="text-sm font-semibold text-slate-900">How it works</div>
 
-            <p className="mt-4 max-w-xl text-base text-muted md:text-lg">
-              Get one clear next step — fast.
-            </p>
-
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Link href="/app/decide" className="btn-primary">
-                Start now
-              </Link>
-              <Link href="#how-it-works" className="btn-secondary">
-                How it works
-              </Link>
-            </div>
-
-            <div className="mt-6 text-xs text-muted">
-              No pressure to log in. Use it instantly — log in only if you want to save history.
-            </div>
-          </div>
-
-          {/* HOW IT WORKS box */}
-          <div id="how-it-works" className="card p-6 md:p-7">
-            <div className="text-sm font-semibold">How it works</div>
-
-            <div className="mt-4 space-y-3">
-              {[
-                { n: "1", t: "Pick a domain + mood", d: "Work, health, relationships… and how you feel right now." },
-                { n: "2", t: "Add your goal", d: "What outcome are you aiming for?" },
-                { n: "3", t: "List a few tasks", d: "Include effort, impact, and emotional friction." },
-                { n: "4", t: "Get one best next step", d: "Plus alternatives — and a confidence check." },
-              ].map((x) => (
-                <div key={x.n} className="flex items-start gap-3 rounded-2xl border border-skin bg-surface2 px-4 py-3">
-                  <div className="grid h-8 w-8 place-items-center rounded-xl bg-accent text-white text-sm font-bold">
-                    {x.n}
+              <div className="mt-4 space-y-3">
+                <div className="flex gap-3 rounded-xl border border-slate-200 bg-white p-4">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-600 to-violet-600 text-sm font-bold text-white">
+                    1
                   </div>
                   <div className="min-w-0">
-                    <div className="text-sm font-semibold">{x.t}</div>
-                    <div className="text-sm text-muted">{x.d}</div>
+                    <div className="text-sm font-semibold text-slate-900">Pick a domain + mood</div>
+                    <div className="text-sm text-slate-600">
+                      Work, health, relationships… and how you feel right now.
+                    </div>
                   </div>
                 </div>
-              ))}
 
-              <div className="rounded-2xl border border-skin bg-surface2 px-4 py-3 text-sm text-muted">
-                Pro tip: Keep tasks action-based (e.g., “Draft 3 slides” not “Presentation”).
+                <div className="flex gap-3 rounded-xl border border-slate-200 bg-white p-4">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-600 to-violet-600 text-sm font-bold text-white">
+                    2
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-sm font-semibold text-slate-900">Add your goal</div>
+                    <div className="text-sm text-slate-600">What outcome are you aiming for?</div>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 rounded-xl border border-slate-200 bg-white p-4">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-600 to-violet-600 text-sm font-bold text-white">
+                    3
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-sm font-semibold text-slate-900">List a few tasks</div>
+                    <div className="text-sm text-slate-600">
+                      Include effort, impact, and emotional friction.
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 rounded-xl border border-slate-200 bg-white p-4">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-600 to-violet-600 text-sm font-bold text-white">
+                    4
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-sm font-semibold text-slate-900">Get one best next step</div>
+                    <div className="text-sm text-slate-600">
+                      Plus alternatives — and a confidence check.
+                    </div>
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-700">
+                  <span className="font-semibold">Pro tip:</span> Keep tasks action-based (e.g., “Draft 3 slides” not
+                  “Presentation”).
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </section>
 
-      {/* VALUE CARDS */}
-      <section className="grid gap-4 md:grid-cols-3">
-        <FeatureCard title="Clear recommendations" desc="One best next step, plus a couple smart alternatives." />
-        <FeatureCard title="Daily focus" desc="Build momentum with simple streaks (optional)." />
-        <FeatureCard title="Track what works" desc="Save outcomes to learn patterns over time." />
+        {/* Bottom feature cards */}
+        <div className="mt-8 grid gap-4 md:grid-cols-3">
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="text-sm font-semibold text-slate-900">Clear recommendations</div>
+            <div className="mt-1 text-sm text-slate-600">One best next step, plus a couple smart alternatives.</div>
+          </div>
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="text-sm font-semibold text-slate-900">Daily focus</div>
+            <div className="mt-1 text-sm text-slate-600">Build momentum with simple streaks (optional).</div>
+          </div>
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="text-sm font-semibold text-slate-900">Track what works</div>
+            <div className="mt-1 text-sm text-slate-600">Save outcomes to learn patterns over time.</div>
+          </div>
+        </div>
       </section>
-    </div>
+    </main>
   );
 }
