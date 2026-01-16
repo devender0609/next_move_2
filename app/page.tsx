@@ -8,10 +8,10 @@ export default function HomePage() {
           <div className="hero-left">
             <div className="pill-row">
               <span className="pill">
-                <span className="dot" /> Decision Assistant
+                <span className="dot" /> Clarity & momentum
               </span>
-              <span className="pill">⚡ Reduce decision fatigue</span>
-              <span className="pill">⏱️ 60 seconds to clarity</span>
+              <span className="pill">⏱️ 60 seconds</span>
+              <span className="pill">✅ One next step</span>
             </div>
 
             <h1 className="hero-title">
@@ -19,12 +19,21 @@ export default function HomePage() {
               <span className="hero-accent">with calm confidence.</span>
             </h1>
 
-            <p className="hero-subtitle">Get one clear next step — fast.</p>
+            <p className="hero-subtitle">
+              Turn “I should…” into one clear next action — sized to your time and energy.
+            </p>
 
             <div className="hero-cta">
               <Link href="/app/decide" className="btn btn-primary">
                 Start now
               </Link>
+              <Link href="/app/history" className="btn btn-ghost">
+                See examples
+              </Link>
+            </div>
+
+            <div className="micro-proof">
+              Transparent logic • No overwhelm • Works for work, health, relationships, money
             </div>
           </div>
 
@@ -35,37 +44,29 @@ export default function HomePage() {
               <div className="how-step">
                 <div className="how-num">1</div>
                 <div>
-                  <div className="how-head">Pick a domain + mood</div>
-                  <div className="how-desc">Work, health, relationships… and how you feel right now.</div>
+                  <div className="how-head">Set your situation</div>
+                  <div className="how-desc">Goal + time + energy (that’s it).</div>
                 </div>
               </div>
 
               <div className="how-step">
                 <div className="how-num">2</div>
                 <div>
-                  <div className="how-head">Add your goal</div>
-                  <div className="how-desc">What outcome are you aiming for?</div>
+                  <div className="how-head">List 3–6 options</div>
+                  <div className="how-desc">Use templates if you want. Edit in seconds.</div>
                 </div>
               </div>
 
               <div className="how-step">
                 <div className="how-num">3</div>
                 <div>
-                  <div className="how-head">List a few tasks</div>
-                  <div className="how-desc">Include benefit, energy cost, and how hard it feels.</div>
-                </div>
-              </div>
-
-              <div className="how-step">
-                <div className="how-num">4</div>
-                <div>
-                  <div className="how-head">Get one best next step</div>
-                  <div className="how-desc">Plus alternatives — and a confidence check.</div>
+                  <div className="how-head">Get one next step</div>
+                  <div className="how-desc">With a clear “why” and 2 alternatives.</div>
                 </div>
               </div>
 
               <div className="how-tip">
-                <strong>Pro tip:</strong> Keep tasks action-based (e.g., “Draft 3 slides” not “Presentation”).
+                <strong>Pro tip:</strong> Write actions, not projects (e.g., “Text Alex to check in”).
               </div>
             </div>
           </div>
@@ -74,18 +75,18 @@ export default function HomePage() {
 
       <section className="feature-row">
         <div className="feature-card">
-          <div className="feature-title">Clear recommendations</div>
-          <div className="feature-desc">One best next step, plus a couple smart alternatives.</div>
+          <div className="feature-title">Simple, explainable</div>
+          <div className="feature-desc">You can see why a step was chosen — no mystery.</div>
         </div>
 
         <div className="feature-card">
-          <div className="feature-title">Daily focus</div>
-          <div className="feature-desc">Build momentum with simple streaks (optional).</div>
+          <div className="feature-title">Sized to your energy</div>
+          <div className="feature-desc">Low-energy days still get a meaningful win.</div>
         </div>
 
         <div className="feature-card">
-          <div className="feature-title">Track what works</div>
-          <div className="feature-desc">Save outcomes to learn patterns over time.</div>
+          <div className="feature-title">Learn what works</div>
+          <div className="feature-desc">Save outcomes to build better instincts over time.</div>
         </div>
       </section>
     </div>

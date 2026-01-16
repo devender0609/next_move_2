@@ -1,33 +1,34 @@
+"use client";
+
 import Link from "next/link";
-import { MobileNav } from "@/components/MobileNav";
+import { usePathname } from "next/navigation";
+
+function NavLink({ href, label }: { href: string; label: string }) {
+  const pathname = usePathname();
+  const active = pathname === href || (href !== "/app" && pathname?.startsWith(href));
+
+  return (
+    <Link className={`side-link ${active ? "side-link-active" : ""}`} href={href}>
+      {label}
+    </Link>
+  );
+}
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="grid gap-6 lg:grid-cols-[260px_1fr] pb-16 lg:pb-0">
-      <aside className="lg:sticky lg:top-6 h-fit rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        {/* ✅ removed the "Workspace / NextMove / Decision assistant" header completely */}
-        <nav className="p-3">
-          {[
-            ["/app", "Overview"],
-            ["/app/decide", "New decision"],
-            ["/app/focus", "Daily focus"],
-            ["/app/history", "History"],
-            ["/app/login", "Login"],
-          ].map(([href, label]) => (
-            <Link
-              key={href}
-              href={href}
-              className="block rounded-xl px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800"
-            >
-              {label}
-            </Link>
-          ))}
-        </nav>
+    <div className="app-shell">
+      <aside className="sidebar-card">
+        <div className="sidebar-title">Workspace</div>
+        <div className="sidebar-nav">
+          <NavLink href="/app" label="Overview" />
+          <NavLink href="/app/decide" label="New decision" />
+          <NavLink href="/app/focus" label="Daily focus" />
+          <NavLink href="/app/history" label="History" />
+          <NavLink href="/app/login" label="Login" />
+        </div>
       </aside>
 
-      <section className="min-w-0">{children}</section>
-
-      <MobileNav />
+      <section className="app-main">{children}</section>
     </div>
   );
 }
