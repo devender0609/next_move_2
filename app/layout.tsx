@@ -43,8 +43,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         <footer className="mt-12 py-6">
           <div className="mx-auto max-w-6xl px-4 text-sm text-slate-500 dark:text-slate-400">
-            © {new Date().getFullYear()} NextMove · Decision Assistant
-          </div>
+            </div>
         </footer>
       </body>
     </html>
