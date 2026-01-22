@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="520" height="140" viewBox="0 0 520 140" fill="none">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="520" y2="140" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6366F1"/>
+      <stop offset="0.5" stop-color="#22C55E"/>
+      <stop offset="1" stop-color="#06B6D4"/>
+    </linearGradient>
+    <filter id="s" x="-20%" y="-50%" width="140%" height="200%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+
+  <rect x="22" y="24" width="92" height="92" rx="26" fill="url(#g)" filter="url(#s)"/>
+  <path d="M58 79c18-22 40-10 52-28" stroke="white" stroke-width="10" stroke-linecap="round"/>
+  <path d="M84 50l24 0 0 24" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="54" cy="92" r="7" fill="white" opacity="0.9"/>
+
+  <text x="132" y="78" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial" font-size="44" font-weight="800" fill="#0F172A">NextMove</text>
+  <text x="132" y="108" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial" font-size="18" font-weight="600" fill="#475569">Decision Assistant</text>
+</svg>
