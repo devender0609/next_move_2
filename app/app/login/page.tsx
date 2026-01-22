@@ -1,63 +1,95 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabase/client";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [msg, setMsg] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
+  const supabase = supabaseBrowser();
+  const router = useRouter();
+  const [email, setEmail] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  async function sendLink() {
-    setBusy(true);
-    setMsg(null);
-    const supabase = supabaseBrowser();
+  useEffect(() => {
+    const init = async () => {
+      const { data } = await supabase.auth.getSession();
+      setEmail(data.session?.user?.email ?? null);
+      setLoading(false);
+    };
 
-    const redirectTo = `${process.env.NEXT_PUBLIC_APP_URL}/app/login`;
+    init();
 
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: redirectTo },
+    const { data: sub } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setEmail(session?.user?.email ?? null);
+      }
+    );
+
+    return () => {
+      sub.subscription.unsubscribe();
+    };
+  }, [supabase]);
+
+  const loginWithGoogle = async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/app`,
+      },
     });
+  };
 
-    setBusy(false);
-    if (error) setMsg(error.message);
-    else setMsg("Magic link sent! Check your email.");
-  }
-
-  async function logout() {
-    const supabase = supabaseBrowser();
+  const logout = async () => {
     await supabase.auth.signOut();
-    setMsg("Logged out.");
-  }
+    router.refresh();
+  };
+
+  if (loading) return null;
 
   return (
-    <div className="max-w-md space-y-4">
-      <h2 className="text-2xl font-semibold">Login</h2>
-      <p className="text-slate-600 text-sm">
-        Enter your email to get a magic login link.
-      </p>
+    <div style={{ maxWidth: 420, margin: "40px auto" }}>
+      {!email ? (
+        <>
+          <h1 style={{ fontSize: 22, marginBottom: 12 }}>Log in</h1>
 
-      <input
-        className="w-full rounded-lg border px-3 py-2"
-        placeholder="you@email.com"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
+          <button
+            onClick={loginWithGoogle}
+            style={{
+              width: "100%",
+              padding: "12px 16px",
+              borderRadius: 10,
+              border: "1px solid #ddd",
+              background: "#fff",
+              cursor: "pointer",
+              fontWeight: 600,
+            }}
+          >
+            Continue with Google
+          </button>
+        </>
+      ) : (
+        <>
+          <h1 style={{ fontSize: 20, marginBottom: 8 }}>
+            Logged in
+          </h1>
 
-      <button
-        className="rounded-lg bg-slate-900 text-white px-4 py-2 disabled:opacity-60"
-        onClick={sendLink}
-        disabled={busy || !email.includes("@")}
-      >
-        {busy ? "Sending..." : "Send magic link"}
-      </button>
+          <p style={{ marginBottom: 16 }}>{email}</p>
 
-      <button className="rounded-lg border px-4 py-2" onClick={logout}>
-        Logout
-      </button>
-
-      {msg && <div className="text-sm text-slate-700">{msg}</div>}
+          <button
+            onClick={logout}
+            style={{
+              padding: "10px 14px",
+              borderRadius: 10,
+              border: "1px solid #ddd",
+              background: "#fff",
+              cursor: "pointer",
+              fontWeight: 600,
+            }}
+          >
+            Log out
+          </button>
+        </>
+      )}
     </div>
   );
 }
